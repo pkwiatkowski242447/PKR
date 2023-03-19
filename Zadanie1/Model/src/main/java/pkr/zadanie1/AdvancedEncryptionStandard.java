@@ -5,7 +5,7 @@ import pkr.exceptions.NoMessageException;
 
 public class AdvancedEncryptionStandard {
 
-    private  int[] substitutionBox = { 0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F,
+    private final int[] substitutionBox = { 0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F,
             0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76, 0xCA, 0x82,
             0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C,
             0xA4, 0x72, 0xC0, 0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC,
@@ -30,7 +30,7 @@ public class AdvancedEncryptionStandard {
             0x28, 0xDF, 0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41,
             0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16 };
 
-    private int[] invertedSubstitutionBox = { 0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5,
+    private final int[] invertedSubstitutionBox = { 0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5,
             0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB, 0x7C, 0xE3,
             0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4,
             0xDE, 0xE9, 0xCB, 0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D,
@@ -55,15 +55,32 @@ public class AdvancedEncryptionStandard {
             0x99, 0x61, 0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1,
             0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D };
 
+    private final int[][] mixColumnsMatrix = {
+            {0x02, 0x03, 0x01, 0x01},
+            {0x01, 0x02, 0x03, 0x01},
+            {0x01, 0x01, 0x02, 0x03},
+            {0x03, 0x01, 0x01, 0x02}
+    };
+
+    private final int[][] invertedMixColumnsMatrix = {
+            {0x0E, 0x0B, 0x0D, 0x09},
+            {0x09, 0x0E, 0x0B, 0x0D},
+            {0x0D, 0x09, 0x0E, 0x0B},
+            {0x0B, 0x0D, 0x09, 0x0E}
+    };
+
+    private byte[][] mainKey;
+
     private final int numberOf32BitBlocks = 4;
     private int keyLength;
     private int numberOfRounds;
 
     public byte[] encryptMessage(byte[] inputMessage, byte[] encryptionKey) {
-        // Ustalenie długości klucza oraz liczby rund, na podstawie podanego klucza
+        // Sprawdzenie czy podany klucz spełnia wymagania algorytmu
         if (!checkIfKeyIsValid(encryptionKey)) {
-            throw new KeyValidityException("Podany klucz nie spełnia wymogów algorytmu");
+            throw new KeyValidityException("Podany klucz nie spełnia wymogów algorytmu.");
         } else {
+            // Ustalenie długości klucza oraz liczby rund, na podstawie podanego klucza
             // Przypisanie wartości zmiennym keyLength i numberOfRounds
             keyLength = encryptionKey.length / 4;
             numberOfRounds = keyLength + 6;
@@ -76,19 +93,21 @@ public class AdvancedEncryptionStandard {
                 // Instrukcja warunkowa służąca określeniu, ile dokładnie bloków będzie potrzebnych do zaszyfrowania wiadomości
                 if (numberOfBlocksInMessage == 0) {
                     messageLengthInBytes = 16;
+                    numberOfBlocksInMessage = 1;
                 } else if ((inputMessage.length % 16) != 0) {
                     messageLengthInBytes = (numberOfBlocksInMessage + 1) * 16;
+                    numberOfBlocksInMessage++;
                 } else {
                     messageLengthInBytes = numberOfBlocksInMessage * 16;
                 }
                 byte[] resultMessage = new byte[messageLengthInBytes];
                 byte[] temporaryArr = new byte[messageLengthInBytes];
                 // Generowanie kluczy wymaganych dla każdej rundy
-                byte[][] mainKey = keyExpansionRoutine(encryptionKey);
+                mainKey = keyExpansionRoutine(encryptionKey);
                 // Instrukcja iteracyjna, która dopełni bazową wiadomość o zera na końcu, tak aby całą dłguość wiadomości była
                 // wielokrotnością długości bloku
-                for (int i = 0; i < numberOfBlocksInMessage; i++) {
-                    if (i < messageLengthInBytes) {
+                for (int i = 0; i < messageLengthInBytes; i++) {
+                    if (i < inputMessage.length) {
                         temporaryArr[i] = inputMessage[i];
                     } else {
                         temporaryArr[i] = 0;
@@ -96,10 +115,13 @@ public class AdvancedEncryptionStandard {
                 }
 
                 byte[] block = new byte[16];
-
-                for (int i = 0; i < inputMessage.length;) {
+                /*
+                    Rozpoczynanie szyfrowania - dla każdego bloku wiadomości przeprowadzamy osobne szyfrowanie -
+                    wynik kopiujemy do tablicy zawierajacej wynik końcowy.
+                */
+                for (int i = 0; i < temporaryArr.length;) {
                     for (int j = 0; j < 16; j++) {
-                        block[j] = inputMessage[i];
+                        block[j] = temporaryArr[i];
                         i++;
                     }
                     block = encryptSingleBlock(block);
@@ -111,48 +133,81 @@ public class AdvancedEncryptionStandard {
     }
 
     public byte[] decryptMessage(byte[] inputMessage, byte[] decryptionKey) {
-        byte[] result;
-        return result;
+        // Sprawdzenie czy podany klucz spełnia wymagania algorytmu.
+        if (!checkIfKeyIsValid(decryptionKey)) {
+            throw new KeyValidityException("Podany klucz nie spełnia wymagań algorytmu.");
+        } else {
+            // Sprawdzenie, czy użytkownik wpisał jakąkolwiek wiadomość do odszyfrowania.
+            if (inputMessage.length == 0) {
+                throw new NoMessageException("Nie podano danych do odszyfrowania.");
+            }
+            byte[] result = new byte[inputMessage.length];
+            byte[] block = new byte[16];
+            // Na podstawie długości klucza dedukowana jest ilość wymaganych rund.
+            keyLength = decryptionKey.length / 4;
+            numberOfRounds = keyLength + 6;
+            // Generowanie podkluczy dla każdej rundy
+            mainKey = keyExpansionRoutine(decryptionKey);
+            for (int i = 0; i < inputMessage.length; ) {
+                for (int j = 0; j < 16; j++) {
+                    block[j] = inputMessage[i];
+                    i++;
+                }
+                block = decryptSingleBlock(block);
+                System.arraycopy(block, 0, result, i - 16, block.length);
+            }
+            int numberOfAddedZeros = 0;
+            for (int i = 0; i < 16; i++) {
+                if (result[result.length - i - 1] == 0) {
+                    numberOfAddedZeros++;
+                } else {
+                    break;
+                }
+            }
+            byte[] finalResult = new byte[result.length - numberOfAddedZeros];
+            System.arraycopy(result, 0, finalResult, 0, result.length - numberOfAddedZeros);
+            return finalResult;
+        }
     }
 
-    private byte[] encryptSingleBlock(byte[] inputMessage) {
+    public byte[] encryptSingleBlock(byte[] inputMessage) {
         byte[] result = new byte[16];
         byte[][] stateMatrix = new byte[4][4];
         for (int i = 0; i < 16; i++) {
             stateMatrix[i / 4][i % 4] = inputMessage[i];
         }
-        stateMatrix = addRoundKey(stateMatrix);
-        for (int i = 0; i < numberOfRounds; i++) {
+        stateMatrix = addRoundKey(stateMatrix, mainKey, 0);
+        for (int i = 1; i < numberOfRounds; i++) {
             stateMatrix = subBytes(stateMatrix);
             stateMatrix = shiftRows(stateMatrix);
             stateMatrix = mixColumns(stateMatrix);
-            stateMatrix = addRoundKey(stateMatrix);
+            stateMatrix = addRoundKey(stateMatrix, mainKey, i);
         }
         stateMatrix = subBytes(stateMatrix);
         stateMatrix = shiftRows(stateMatrix);
-        stateMatrix = addRoundKey(stateMatrix);
+        stateMatrix = addRoundKey(stateMatrix, mainKey, numberOfRounds);
         for (int i = 0; i < 16; i++) {
             result[i] = stateMatrix[i / 4][i % 4];
         }
         return result;
     }
 
-    private byte[] decryptSingleBlock(byte[] inputMessage) {
+    public byte[] decryptSingleBlock(byte[] inputMessage) {
         byte[] result = new byte[16];
         byte[][] stateMatrix = new byte[4][4];
         for (int i = 0; i < 16; i++) {
             stateMatrix[i / 4][i % 4] = inputMessage[i];
         }
-        stateMatrix = invertedAddRoundKey(stateMatrix);
-        for (int i = 0; i < numberOfRounds; i++) {
+        stateMatrix = invertedAddRoundKey(stateMatrix, mainKey, numberOfRounds);
+        for (int i = numberOfRounds - 1; i > 0; i--) {
             stateMatrix = invertedShiftRows(stateMatrix);
             stateMatrix = invertedSubBytes(stateMatrix);
-            stateMatrix = invertedAddRoundKey(stateMatrix);
+            stateMatrix = invertedAddRoundKey(stateMatrix, mainKey, i);
             stateMatrix = invertedMixColumns(stateMatrix);
         }
         stateMatrix = invertedShiftRows(stateMatrix);
         stateMatrix = invertedSubBytes(stateMatrix);
-        stateMatrix = invertedAddRoundKey(stateMatrix);
+        stateMatrix = invertedAddRoundKey(stateMatrix, mainKey, 0);
         for (int i = 0; i < 16; i++) {
             result[i] = stateMatrix[i / 4][i % 4];
         }
@@ -169,12 +224,12 @@ public class AdvancedEncryptionStandard {
         }
     }
 
-    private byte[][] keyExpansionRoutine(byte[] inputKey) {
+    public byte[][] keyExpansionRoutine(byte[] inputKey) {
         byte[][] resultKeys = new byte[numberOf32BitBlocks * (numberOfRounds + 1)][4];
         int iterator = 0;
 
         // Pętla uzupełniająca pierwsze Nk (tj. numberOfKey32BitBlocks) wierszy kluczem podanym przez użytkownika
-        while (iterator < inputKey.length) {
+        while (iterator < keyLength) {
             resultKeys[iterator][0] = inputKey[4 * iterator];
             resultKeys[iterator][1] = inputKey[4 * iterator + 1];
             resultKeys[iterator][2] = inputKey[4 * iterator + 2];
@@ -183,7 +238,6 @@ public class AdvancedEncryptionStandard {
         }
 
         iterator = keyLength;
-
         byte[] temp = new byte[4];
         // Pętla uzupełniająca kolejne wiersze odpowiednimi wartościami
         while (iterator < numberOf32BitBlocks * (numberOfRounds + 1)) {
@@ -193,110 +247,188 @@ public class AdvancedEncryptionStandard {
             temp[3] = resultKeys[iterator - 1][3];
 
             if (iterator % keyLength == 0) {
-                byte[] subWordByteArray = SubWord(RotWord(temp));
+                byte[] subWordByteArray = substituteWord(rotateWord(temp));
                 byte[] roundConstant = roundConstant(iterator / keyLength);
                 temp[0] = (byte) (subWordByteArray[0] ^ roundConstant[0]);
                 temp[1] = (byte) (subWordByteArray[1] ^ roundConstant[1]);
                 temp[2] = (byte) (subWordByteArray[2] ^ roundConstant[2]);
                 temp[3] = (byte) (subWordByteArray[3] ^ roundConstant[3]);
             } else if (keyLength > 6 && (iterator % keyLength) == 0) {
-                temp = SubWord(temp);
+                temp = substituteWord(temp);
             }
 
-            resultKeys[iterator][0] = (byte)(resultKeys[iterator - keyLength][0] ^ temp[0]);
-            resultKeys[iterator][1] = (byte)(resultKeys[iterator - keyLength][1] ^ temp[1]);
-            resultKeys[iterator][2] = (byte)(resultKeys[iterator - keyLength][2] ^ temp[2]);
-            resultKeys[iterator][3] = (byte)(resultKeys[iterator - keyLength][3] ^ temp[3]);
+            resultKeys[iterator][0] = (byte) (resultKeys[iterator - keyLength][0] ^ temp[0]);
+            resultKeys[iterator][1] = (byte) (resultKeys[iterator - keyLength][1] ^ temp[1]);
+            resultKeys[iterator][2] = (byte) (resultKeys[iterator - keyLength][2] ^ temp[2]);
+            resultKeys[iterator][3] = (byte) (resultKeys[iterator - keyLength][3] ^ temp[3]);
 
             iterator++;
         }
         return resultKeys;
     }
 
-    private byte[] RotWord(byte[] inputByteArray) {
+    public byte[] rotateWord(byte[] inputByteArray) {
         int iterator = 1;
         int arraySize = inputByteArray.length;
         while (iterator < arraySize) {
             byte tmp = inputByteArray[iterator - 1];
             inputByteArray[iterator - 1] = inputByteArray[iterator];
             inputByteArray[iterator] = tmp;
+            iterator++;
         }
         return inputByteArray;
     }
 
-    private byte[] SubWord(byte[] inputByteArray) {
+    public byte[] substituteWord(byte[] inputByteArray) {
+        byte[] resultArray = new byte[inputByteArray.length];
         for (int i = 0; i < inputByteArray.length; i++) {
-            inputByteArray[i] = (byte) substitutionBox[inputByteArray[i]];
+            resultArray[i] = (byte) substitutionBox[inputByteArray[i] & 0xFF];
         }
+        return resultArray;
     }
 
-    private byte[] roundConstant(int roundNumber) {
+    public byte[] roundConstant(int roundNumber) {
         int roundCoefficient = calculateCoefficientValue(roundNumber);
         byte[] rCon = {(byte)roundCoefficient, 0, 0, 0};
         return rCon;
     }
 
-    private int calculateCoefficientValue(int roundNumber) {
+    public int calculateCoefficientValue(int roundNumber) {
         int roundConstantCoefficient = 0;
-        if (roundNumber == 1) {
+        if (roundNumber > 0) {
             roundConstantCoefficient = 1;
-        } else if (roundNumber > 1 && roundConstantCoefficient < 0x80) {
-            roundConstantCoefficient = 2 * calculateCoefficientValue(roundNumber - 1);
-        } else {
-            roundConstantCoefficient = (2 * calculateCoefficientValue(roundNumber - 1)) ^ 0x11B;
+            for (int i = 1; i < roundNumber; i++) {
+                if (roundConstantCoefficient >= 0x80) {
+                    roundConstantCoefficient = (2 * roundConstantCoefficient) ^ 0x11B;
+                } else {
+                    roundConstantCoefficient *= 2;
+                }
+            }
         }
         return roundConstantCoefficient;
     }
 
-    private byte[][] addRoundKey(byte[][] inputByteArray, byte[][] inputKey, int roundNumber) {
-        byte[][] resultArray = new byte[inputByteArray.length][inputByteArray[0].length];
+    public byte[][] addRoundKey(byte[][] stateMatrix, byte[][] inputKey, int roundNumber) {
+        byte[][] resultArray = new byte[stateMatrix.length][stateMatrix[0].length];
         for (int i = 0; i < numberOf32BitBlocks; i++) {
             for (int j = 0; j < 4; j++) {
-                resultArray[i][j] = (byte) (inputByteArray[i][j] ^ inputKey[roundNumber * numberOf32BitBlocks + i][j]);
+                resultArray[j][i] = (byte) (stateMatrix[j][i] ^ inputKey[roundNumber * numberOf32BitBlocks + i][j]);
             }
         }
         return resultArray;
     }
 
-    private byte[][] invertedAddRoundKey(byte[][] inputByteArray) {
-        return null;
+    public byte[][] invertedAddRoundKey(byte[][] stateMatrix, byte[][] inputKey, int roundNumber) {
+        return addRoundKey(stateMatrix, inputKey, roundNumber);
     }
 
-    private byte[][] subBytes(byte[][] inputByteArray) {
-        byte[][] resultArray = new byte[inputByteArray.length][inputByteArray[0].length];
+    public byte[][] subBytes(byte[][] stateMatrix) {
+        byte[][] resultArray = new byte[stateMatrix.length][stateMatrix[0].length];
         for (int i = 0; i < numberOf32BitBlocks; i++) {
             for (int j = 0; j < 4; j++) {
-                resultArray[i][j] = (byte) substitutionBox[inputByteArray[i][j]];
+                resultArray[i][j] = (byte) substitutionBox[stateMatrix[i][j] & 0xFF];
             }
         }
         return resultArray;
     }
 
-    private byte[][] invertedSubBytes(byte[][] inputByteArray) {
-        return null;
-    }
-
-    private byte[][] shiftRows(byte[][] inputByteArray) {
-        byte[][] resultArray = new byte[inputByteArray.length][inputByteArray[0].length];
+    public byte[][] invertedSubBytes(byte[][] stateMatrix) {
+        byte[][] resultArray = new byte[stateMatrix.length][stateMatrix[0].length];
         for (int i = 0; i < numberOf32BitBlocks; i++) {
             for (int j = 0; j < 4; j++) {
-                resultArray[i][j] = inputByteArray[i][(j - i) % 4];
+                resultArray[i][j] = (byte) invertedSubstitutionBox[stateMatrix[i][j] & 0xFF];
             }
         }
         return resultArray;
     }
 
-    private byte[][] invertedShiftRows(byte[][] inputByteArray) {
-        return null;
-    }
-
-    private byte[][] mixColumns(byte[][] inputByteArray) {
-        byte[][] resultArray = new byte[inputByteArray.length][inputByteArray[0].length];
-
+    public byte[][] shiftRows(byte[][] stateMatrix) {
+        byte[][] resultArray = new byte[stateMatrix.length][stateMatrix[0].length];
+        for (int i = 0; i < numberOf32BitBlocks; i++) {
+            for (int j = 0; j < 4; j++) {
+                resultArray[i][j] = stateMatrix[i][(j + i) % 4];
+            }
+        }
         return resultArray;
     }
 
-    private byte[][] invertedMixColumns(byte[][] inputByteArray) {
-        return null;
+    public byte[][] invertedShiftRows(byte[][] stateMatrix) {
+        byte[][] resultArray = new byte[stateMatrix.length][stateMatrix[0].length];
+        for (int i = 0; i < numberOf32BitBlocks; i++) {
+            for (int j = 0; j < 4; j++) {
+                resultArray[i][(j + i) % 4] = stateMatrix[i][j];
+            }
+        }
+        return resultArray;
+    }
+
+    public byte[][] mixColumns(byte[][] inputByteArray) {
+        int[] newByteValue = new int[4];
+        for (int i = 0; i < numberOf32BitBlocks; i++) {
+            newByteValue[0] = byteMultiplication((byte) mixColumnsMatrix[0][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[0][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[0][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[0][3], inputByteArray[3][i]);
+            newByteValue[1] = byteMultiplication((byte) mixColumnsMatrix[1][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[1][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[1][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[1][3], inputByteArray[3][i]);
+            newByteValue[2] = byteMultiplication((byte) mixColumnsMatrix[2][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[2][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[2][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[2][3], inputByteArray[3][i]);
+            newByteValue[3] = byteMultiplication((byte) mixColumnsMatrix[3][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[3][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[3][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) mixColumnsMatrix[3][3], inputByteArray[3][i]);
+            for (int j = 0; j < 4; j++) {
+                inputByteArray[j][i] = (byte) newByteValue[j];
+            }
+        }
+        return inputByteArray;
+    }
+
+    public byte[][] invertedMixColumns(byte[][] inputByteArray) {
+        byte[][] resultArray = new byte[inputByteArray.length][inputByteArray[0].length];
+        int[] newByteValue = new int[4];
+        for (int i = 0; i < numberOf32BitBlocks; i++) {
+            newByteValue[0] = byteMultiplication((byte) invertedMixColumnsMatrix[0][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[0][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[0][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[0][3], inputByteArray[3][i]);
+            newByteValue[1] = byteMultiplication((byte) invertedMixColumnsMatrix[1][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[1][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[1][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[1][3], inputByteArray[3][i]);
+            newByteValue[2] = byteMultiplication((byte) invertedMixColumnsMatrix[2][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[2][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[2][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[2][3], inputByteArray[3][i]);
+            newByteValue[3] = byteMultiplication((byte) invertedMixColumnsMatrix[3][0], inputByteArray[0][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[3][1], inputByteArray[1][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[3][2], inputByteArray[2][i]) ^
+                    byteMultiplication((byte) invertedMixColumnsMatrix[3][3], inputByteArray[3][i]);
+            for (int j = 0; j < 4; j++) {
+                resultArray[j][i] = (byte) newByteValue[j];
+            }
+        }
+        return resultArray;
+    }
+
+    public byte byteMultiplication(byte firstByte, byte secondByte) {
+        byte resultByte = 0;
+        byte additionalVariable;
+        while (firstByte != 0) {
+            if ((firstByte & 1) != 0) {
+                resultByte = (byte) (resultByte ^ secondByte);
+            }
+            additionalVariable = (byte) (secondByte & 0x80);
+            secondByte = (byte) (secondByte << 1);
+            if (additionalVariable != 0) {
+                secondByte = (byte) (secondByte ^ 0x1B);
+            }
+            firstByte = (byte) ((firstByte & 0xFF) >> 1);
+        }
+        return resultByte;
     }
 }
