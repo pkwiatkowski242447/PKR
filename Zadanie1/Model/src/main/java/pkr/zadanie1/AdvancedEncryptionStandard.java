@@ -214,7 +214,7 @@ public class AdvancedEncryptionStandard {
         return result;
     }
 
-    private boolean checkIfKeyIsValid(byte[] inputKey) {
+    public boolean checkIfKeyIsValid(byte[] inputKey) {
         if (inputKey == null) {
             return false;
         } else if (inputKey.length == 16 || inputKey.length == 24 || inputKey.length == 32) {

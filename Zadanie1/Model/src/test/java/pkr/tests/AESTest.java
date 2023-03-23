@@ -3,6 +3,7 @@ package pkr.tests;
 import pkr.zadanie1.AdvancedEncryptionStandard;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
