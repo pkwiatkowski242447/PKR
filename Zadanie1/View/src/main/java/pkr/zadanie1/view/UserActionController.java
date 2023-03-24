@@ -12,6 +12,7 @@ import pkr.zadanie1.IOManager;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 
 public class UserActionController {
 
@@ -19,13 +20,19 @@ public class UserActionController {
     private TextArea plainText;
 
     @FXML
+    private TextArea cipherText;
+
+    @FXML
     private TextArea userInputKey;
+
+    private final String ERROR_MESSAGE = "Błąd";
 
     AdvancedEncryptionStandard AES = new AdvancedEncryptionStandard();
 
     @FXML
     public void initialize() {
         plainText.setPromptText("Wprowadź tekst jawny...");
+        cipherText.setPromptText("Wprowadź szyfrogram...");
         userInputKey.setPromptText("Wprowadź 128, 192 lub 256 bitowy klucz do szyfrowania / deszyfrowania.");
     }
 
@@ -36,33 +43,29 @@ public class UserActionController {
         pathToFile = chooseFile.showOpenDialog(StageSetup.getStage()).getAbsolutePath();
         if (pathToFile != null) {
             IOManager ioManager = new IOManager(pathToFile);
-            byte[] fileInputPlainText = ioManager.readBytesFromFile();
-            plainText.setText(new String(fileInputPlainText, StandardCharsets.UTF_8));
+            try {
+                byte[] fileInputPlainText = ioManager.readBytesFromFile();
+                plainText.setText(new String(fileInputPlainText, StandardCharsets.UTF_8));
+            } catch (IOReadException readException) {
+                String header = "Błąd odczytu z pliku";
+                showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, readException.getMessage());
+            }
         }
     }
 
     @FXML
-    public void decryptCipherText() throws IOReadException {
+    public void readCipherTextFromFile() throws IOReadException {
         String pathToFile;
         FileChooser chooseFile = new FileChooser();
         pathToFile = chooseFile.showOpenDialog(StageSetup.getStage()).getAbsolutePath();
         if (pathToFile != null) {
             IOManager ioManager = new IOManager(pathToFile);
-            byte[] decryptionKey = userInputKey.getText().getBytes(StandardCharsets.UTF_8);
-            byte[] fileInputCipherText = ioManager.readBytesFromFile();
             try {
-                byte[] decryptedMessage = AES.decryptMessage(fileInputCipherText, decryptionKey);
-                plainText.setText(new String(decryptedMessage, StandardCharsets.UTF_8));
-            } catch (KeyValidityException keyValExc) {
-                String title = "Wystąpił błąd";
-                String header = "Nieprawidłowy klucz";
-                String content = keyValExc.getMessage();
-                showAlert(Alert.AlertType.ERROR, title, header, content);
-            } catch (NoMessageException noMessExc) {
-                String title = "Wystąpił błąd";
-                String header = "Nieprawidłowa wiadomość";
-                String content = noMessExc.getMessage();
-                showAlert(Alert.AlertType.ERROR, title, header, content);
+                byte[] fileInputCipherText = ioManager.readBytesFromFile();
+                cipherText.setText(new String(fileInputCipherText, StandardCharsets.UTF_8));
+            } catch (IOReadException readException) {
+                String header = "Błąd odczytu z pliku";
+                showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, readException.getMessage());
             }
         }
     }
@@ -74,32 +77,62 @@ public class UserActionController {
         if (file != null) {
             byte[] plainTextToSave = plainText.getText().getBytes(StandardCharsets.UTF_8);
             IOManager ioManager = new IOManager(file.getAbsolutePath());
-            ioManager.saveBytesToFile(plainTextToSave);
+            try {
+                ioManager.saveBytesToFile(plainTextToSave);
+            } catch (IOWriteException writeException) {
+                String header = "Błąd zapisu do pliku";
+                showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, writeException.getMessage());
+            }
         }
     }
 
     @FXML
-    public void encryptPlainText() throws IOWriteException {
+    public void saveCipherTextToFile() throws IOWriteException {
         FileChooser chooseFile = new FileChooser();
         File file = chooseFile.showSaveDialog(StageSetup.getStage());
         if (file != null) {
-            byte[] plainTextToSave = plainText.getText().getBytes(StandardCharsets.UTF_8);
-            byte[] encryptionKey = userInputKey.getText().getBytes(StandardCharsets.UTF_8);
+            byte[] cipherTextToSave = cipherText.getText().getBytes(StandardCharsets.UTF_8);
+            IOManager ioManager = new IOManager(file.getAbsolutePath());
             try {
-                byte[] encryptedMessage = AES.encryptMessage(plainTextToSave, encryptionKey);
-                IOManager ioManager = new IOManager(file.getAbsolutePath());
-                ioManager.saveBytesToFile(encryptedMessage);
-            } catch (KeyValidityException keyValExc) {
-                String title = "Wystąpił błąd";
-                String header = "Nieprawidłowy klucz";
-                String content = keyValExc.getMessage();
-                showAlert(Alert.AlertType.ERROR, title, header, content);
-            } catch (NoMessageException noMessExc) {
-                String title = "Wystąpił błąd";
-                String header = "Nieprawidłowa wiadomość";
-                String content = noMessExc.getMessage();
-                showAlert(Alert.AlertType.ERROR, title, header, content);
+                ioManager.saveBytesToFile(cipherTextToSave);
+            } catch (IOWriteException writeException) {
+                String header = "Błąd zapisu do pliku";
+                showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, writeException.getMessage());
             }
+        }
+    }
+
+    @FXML
+    public void cipherTheInputPlainText() {
+        byte[] encryptionKey = userInputKey.getText().getBytes(StandardCharsets.UTF_8);
+        byte[] inputPlainText = plainText.getText().getBytes(StandardCharsets.UTF_8);
+        try {
+            byte[] encryptedMessage = AES.encryptMessage(inputPlainText, encryptionKey);
+            String hexRepresentation = IOManager.convertByteArrayToHex(encryptedMessage);
+            cipherText.setText(hexRepresentation);
+        } catch (KeyValidityException invalidKeyException) {
+            String header = "Nieprawidłowy klucz";
+            showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, invalidKeyException.getMessage());
+        } catch (NoMessageException messageException) {
+            String header = "Nieprawidłowa wiadomość";
+            showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, messageException.getMessage());
+        }
+    }
+
+    @FXML
+    public void decipherTheCipherText() {
+        byte[] decryptionKey = userInputKey.getText().getBytes(StandardCharsets.UTF_8);
+        String hexRepresentation = cipherText.getText();
+        byte[] inputCipherText = IOManager.convertHexToByteArray(hexRepresentation);
+        try {
+            byte[] decryptedMessage = AES.decryptMessage(inputCipherText, decryptionKey);
+            plainText.setText(new String(decryptedMessage, StandardCharsets.UTF_8));
+        } catch (KeyValidityException invalidKeyException) {
+            String header = "Nieprawidłowy klucz";
+            showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, invalidKeyException.getMessage());
+        } catch (NoMessageException messageException) {
+            String header = "Nieprawidłowa wiadomość";
+            showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, messageException.getMessage());
         }
     }
 
