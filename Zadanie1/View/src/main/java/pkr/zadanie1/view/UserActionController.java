@@ -158,4 +158,22 @@ public class UserActionController {
         someAlert.show();
     }
 
+    @FXML
+    public void generate128Key() {
+        byte[] generatedKey = AdvancedEncryptionStandard.generateKey(128 / 8);
+        userInputKey.setText(new String(generatedKey, StandardCharsets.UTF_8));
+    }
+
+    @FXML
+    public void generate192Key() {
+        byte[] generatedKey = AdvancedEncryptionStandard.generateKey(192 / 8);
+        userInputKey.setText(new String(generatedKey, StandardCharsets.UTF_8));
+    }
+
+    @FXML
+    public void generate256Key() {
+        byte[] generatedKey = AdvancedEncryptionStandard.generateKey(256 / 8);
+        userInputKey.setText(new String(generatedKey, StandardCharsets.UTF_8));
+    }
+
 }
