@@ -435,7 +435,7 @@ public class AdvancedEncryptionStandard {
     public static byte[] generateKey(int keyLength) {
         byte[] generatedKey = new byte[keyLength];
         for (int i = 0; i < keyLength; i++) {
-            generatedKey[i] = (byte) ((int) (Math.random() * 96) + 32);
+            generatedKey[i] = (byte) ((int) (Math.random() * 95) + 32);
         }
         return generatedKey;
     }
