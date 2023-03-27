@@ -82,19 +82,19 @@ public class AdvancedEncryptionStandard {
         } else {
             // Ustalenie długości klucza oraz liczby rund, na podstawie podanego klucza
             // Przypisanie wartości zmiennym keyLength i numberOfRounds
-            keyLength = encryptionKey.length / 4;
+            keyLength = encryptionKey.length >> 2;
             numberOfRounds = keyLength + 6;
             // Sprawdznie czy użytkownik w ogóle podał jakąkolwiek wiadomość do zaszyfrowania
             if (inputMessage.length == 0) {
                 throw new NoMessageException("Nie podano wiadomości do zaszyfrowania");
             } else {
                 int messageLengthInBytes;                               // Zmienna przechowująca długość wiadomości w bajtach
-                int numberOfBlocksInMessage = inputMessage.length / 16; // Zmienna przechowująca ilość 16 bajtowych ciągów w wiadomości
+                int numberOfBlocksInMessage = inputMessage.length >> 4; // Zmienna przechowująca ilość 16 bajtowych ciągów w wiadomości
                 // Instrukcja warunkowa służąca określeniu, ile dokładnie bloków będzie potrzebnych do zaszyfrowania wiadomości
                 if (numberOfBlocksInMessage == 0) {
                     messageLengthInBytes = 16;
                     numberOfBlocksInMessage = 1;
-                } else if ((inputMessage.length % 16) != 0) {
+                } else if ((inputMessage.length & 15) != 0) {
                     messageLengthInBytes = (numberOfBlocksInMessage + 1) * 16;
                     numberOfBlocksInMessage++;
                 } else {
@@ -106,11 +106,17 @@ public class AdvancedEncryptionStandard {
                 mainKey = keyExpansionRoutine(encryptionKey);
                 // Instrukcja iteracyjna, która dopełni bazową wiadomość o zera na końcu, tak aby całą dłguość wiadomości była
                 // wielokrotnością długości bloku
+                int numberOfAddedBytes = 1;
                 for (int i = 0; i < messageLengthInBytes; i++) {
                     if (i < inputMessage.length) {
                         temporaryArr[i] = inputMessage[i];
                     } else {
-                        temporaryArr[i] = 0;
+                        if (i == messageLengthInBytes - 1) {
+                            temporaryArr[i] = (byte) numberOfAddedBytes;
+                        } else {
+                            temporaryArr[i] = 0;
+                            numberOfAddedBytes++;
+                        }
                     }
                 }
 
@@ -144,7 +150,7 @@ public class AdvancedEncryptionStandard {
             byte[] result = new byte[inputMessage.length];
             byte[] block = new byte[16];
             // Na podstawie długości klucza dedukowana jest ilość wymaganych rund.
-            keyLength = decryptionKey.length / 4;
+            keyLength = decryptionKey.length >> 2;
             numberOfRounds = keyLength + 6;
             // Generowanie podkluczy dla każdej rundy
             mainKey = keyExpansionRoutine(decryptionKey);
@@ -156,14 +162,7 @@ public class AdvancedEncryptionStandard {
                 block = decryptSingleBlock(block);
                 System.arraycopy(block, 0, result, i - 16, block.length);
             }
-            int numberOfAddedZeros = 0;
-            for (int i = 0; i < 16; i++) {
-                if (result[result.length - i - 1] == 0) {
-                    numberOfAddedZeros++;
-                } else {
-                    break;
-                }
-            }
+            int numberOfAddedZeros = result[result.length - 1];
             byte[] finalResult = new byte[result.length - numberOfAddedZeros];
             System.arraycopy(result, 0, finalResult, 0, result.length - numberOfAddedZeros);
             return finalResult;
@@ -174,7 +173,7 @@ public class AdvancedEncryptionStandard {
         byte[] result = new byte[16];
         byte[][] stateMatrix = new byte[4][4];
         for (int i = 0; i < 16; i++) {
-            stateMatrix[i / 4][i % 4] = inputMessage[i];
+            stateMatrix[i >> 2][i & 3] = inputMessage[i];
         }
         stateMatrix = addRoundKey(stateMatrix, mainKey, 0);
         for (int i = 1; i < numberOfRounds; i++) {
@@ -187,7 +186,7 @@ public class AdvancedEncryptionStandard {
         stateMatrix = shiftRows(stateMatrix);
         stateMatrix = addRoundKey(stateMatrix, mainKey, numberOfRounds);
         for (int i = 0; i < 16; i++) {
-            result[i] = stateMatrix[i / 4][i % 4];
+            result[i] = stateMatrix[i >> 2][i & 3];
         }
         return result;
     }
@@ -196,7 +195,7 @@ public class AdvancedEncryptionStandard {
         byte[] result = new byte[16];
         byte[][] stateMatrix = new byte[4][4];
         for (int i = 0; i < 16; i++) {
-            stateMatrix[i / 4][i % 4] = inputMessage[i];
+            stateMatrix[i >> 2][i & 3] = inputMessage[i];
         }
         stateMatrix = invertedAddRoundKey(stateMatrix, mainKey, numberOfRounds);
         for (int i = numberOfRounds - 1; i > 0; i--) {
@@ -209,7 +208,7 @@ public class AdvancedEncryptionStandard {
         stateMatrix = invertedSubBytes(stateMatrix);
         stateMatrix = invertedAddRoundKey(stateMatrix, mainKey, 0);
         for (int i = 0; i < 16; i++) {
-            result[i] = stateMatrix[i / 4][i % 4];
+            result[i] = stateMatrix[i >> 2][i & 3];
         }
         return result;
     }
@@ -346,7 +345,7 @@ public class AdvancedEncryptionStandard {
         byte[][] resultArray = new byte[stateMatrix.length][stateMatrix[0].length];
         for (int i = 0; i < numberOf32BitBlocks; i++) {
             for (int j = 0; j < 4; j++) {
-                resultArray[i][j] = stateMatrix[i][(j + i) % 4];
+                resultArray[i][j] = stateMatrix[i][(j + i) & 3];
             }
         }
         return resultArray;
@@ -356,7 +355,7 @@ public class AdvancedEncryptionStandard {
         byte[][] resultArray = new byte[stateMatrix.length][stateMatrix[0].length];
         for (int i = 0; i < numberOf32BitBlocks; i++) {
             for (int j = 0; j < 4; j++) {
-                resultArray[i][(j + i) % 4] = stateMatrix[i][j];
+                resultArray[i][(j + i) & 3] = stateMatrix[i][j];
             }
         }
         return resultArray;
@@ -435,7 +434,7 @@ public class AdvancedEncryptionStandard {
     public static byte[] generateKey(int keyLength) {
         byte[] generatedKey = new byte[keyLength];
         for (int i = 0; i < keyLength; i++) {
-            generatedKey[i] = (byte) ((int) (Math.random() * 95) + 32);
+            generatedKey[i] = (byte) (Math.random() * 128);
         }
         return generatedKey;
     }

@@ -37,20 +37,20 @@ public class IOManager {
         }
     }
 
-    public static String convertByteArrayToHex(byte[] inputByteArray) {
+    public static byte[] convertByteArrayToHex(byte[] inputByteArray) {
         byte[] hexCharArray = new byte[inputByteArray.length * 2];
         for (int i = 0; i < inputByteArray.length; i++) {
             int value = inputByteArray[i] & 0xFF;
             hexCharArray[2 * i] = HEX_LETTERS[value >> 4];
             hexCharArray[2 * i + 1] = HEX_LETTERS[value & 0xF];
         }
-        return new String(hexCharArray, StandardCharsets.US_ASCII);
+        return hexCharArray;
     }
 
-    public static byte[] convertHexToByteArray(String inputHexMessage) {
-        byte[] messageByteArray = inputHexMessage.getBytes(StandardCharsets.UTF_8);
-        byte[] resultByteArray = new byte[inputHexMessage.length() / 2];
-        for (int i = 0; i < inputHexMessage.length(); i += 2) {
+    public static byte[] convertHexToByteArray(byte[] inputHexArray) {
+        byte[] messageByteArray = inputHexArray;
+        byte[] resultByteArray = new byte[inputHexArray.length / 2];
+        for (int i = 0; i < inputHexArray.length; i += 2) {
             resultByteArray[i / 2] = (byte) ((digitValue(messageByteArray[i]) << 4) + digitValue(messageByteArray[i + 1]));
         }
         return resultByteArray;
