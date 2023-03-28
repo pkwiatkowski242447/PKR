@@ -28,6 +28,9 @@ public class UserActionController {
     @FXML
     private TextField operationTime;
 
+    @FXML
+    private CheckBox binaryContent;
+
     private long startOfMeasurementTime;
     private long endOfMeasurementTime;
     private final String ERROR_MESSAGE = "Błąd";
@@ -50,7 +53,11 @@ public class UserActionController {
             IOManager ioManager = new IOManager(pathToFile);
             try {
                 byte[] fileInputPlainText = ioManager.readBytesFromFile();
-                plainText.setText(new String(fileInputPlainText, StandardCharsets.UTF_8));
+                if (binaryContent.isSelected()) {
+                    plainText.setText(new String(IOManager.convertByteArrayToHex(fileInputPlainText), StandardCharsets.UTF_8));
+                } else {
+                    plainText.setText(new String(fileInputPlainText, StandardCharsets.UTF_8));
+                }
             } catch (IOReadException readException) {
                 String header = "Błąd odczytu tekstu jawnego z pliku";
                 showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, readException.getMessage());
@@ -83,7 +90,11 @@ public class UserActionController {
             byte[] plainTextToSave = plainText.getText().getBytes(StandardCharsets.UTF_8);
             IOManager ioManager = new IOManager(file.getAbsolutePath());
             try {
-                ioManager.saveBytesToFile(plainTextToSave);
+                if (binaryContent.isSelected()) {
+                    ioManager.saveBytesToFile(IOManager.convertHexToByteArray(plainTextToSave));
+                } else {
+                    ioManager.saveBytesToFile(plainTextToSave);
+                }
             } catch (IOWriteException writeException) {
                 String header = "Błąd zapisu tekstu jawnego do pliku";
                 showAlert(Alert.AlertType.ERROR, ERROR_MESSAGE, header, writeException.getMessage());
@@ -109,15 +120,20 @@ public class UserActionController {
 
     @FXML
     public void cipherTheInputPlainText() {
-        byte[] inputPlainText = plainText.getText().getBytes(StandardCharsets.UTF_8);
+        byte[] inputPlainText;
+        if (binaryContent.isSelected()) {
+            inputPlainText = IOManager.convertHexToByteArray(plainText.getText().getBytes(StandardCharsets.UTF_8));
+        } else {
+            inputPlainText = plainText.getText().getBytes(StandardCharsets.UTF_8);
+        }
         try {
             byte[] encryptionKey = IOManager.convertHexToByteArray(userInputKey.getText().getBytes(StandardCharsets.US_ASCII));
-            startOfMeasurementTime = System.currentTimeMillis();
+            startOfMeasurementTime = System.nanoTime();
             byte[] outputCipherText = IOManager.convertByteArrayToHex(AES.encryptMessage(inputPlainText, encryptionKey));
-            endOfMeasurementTime = System.currentTimeMillis();
+            endOfMeasurementTime = System.nanoTime();
             cipherText.setText(new String(outputCipherText, StandardCharsets.US_ASCII));
             double lengthInMegaBytes = (double) inputPlainText.length / (1024 * 1024);
-            double periodOfTimeInSeconds = (double) (endOfMeasurementTime - startOfMeasurementTime) / 1000;
+            double periodOfTimeInSeconds = (double) (endOfMeasurementTime - startOfMeasurementTime) / 1000000000;
             double outputRate = lengthInMegaBytes / periodOfTimeInSeconds;
             DecimalFormat decimalFormat = new DecimalFormat("0.00000");
             operationTime.setText(decimalFormat.format(outputRate) + " MB / s");
@@ -135,12 +151,16 @@ public class UserActionController {
         byte[] inputCipherText = IOManager.convertHexToByteArray(cipherText.getText().getBytes(StandardCharsets.US_ASCII));
         try {
             byte[] decryptionKey = IOManager.convertHexToByteArray(userInputKey.getText().getBytes(StandardCharsets.US_ASCII));
-            startOfMeasurementTime = System.currentTimeMillis();
+            startOfMeasurementTime = System.nanoTime();
             byte[] outputPlainText = AES.decryptMessage(inputCipherText, decryptionKey);
-            endOfMeasurementTime = System.currentTimeMillis();
-            plainText.setText(new String(outputPlainText, StandardCharsets.UTF_8));
+            endOfMeasurementTime = System.nanoTime();
+            if (binaryContent.isSelected()) {
+                plainText.setText(new String(IOManager.convertByteArrayToHex(outputPlainText), StandardCharsets.UTF_8));
+            } else {
+                plainText.setText(new String(outputPlainText, StandardCharsets.UTF_8));
+            }
             double lengthInMegaBytes = (double) inputCipherText.length / (1024 * 1024);
-            double periodOfTimeInSeconds = (double) (endOfMeasurementTime - startOfMeasurementTime) / 1000;
+            double periodOfTimeInSeconds = (double) (endOfMeasurementTime - startOfMeasurementTime) / 1000000000;
             double outputRate = lengthInMegaBytes / periodOfTimeInSeconds;
             DecimalFormat decimalFormat = new DecimalFormat("0.00000");
             operationTime.setText(String.format(decimalFormat.format(outputRate) + " MB / s"));

@@ -100,25 +100,26 @@ public class AdvancedEncryptionStandard {
                 } else {
                     messageLengthInBytes = numberOfBlocksInMessage * 16;
                 }
-                byte[] resultMessage = new byte[messageLengthInBytes];
-                byte[] temporaryArr = new byte[messageLengthInBytes];
+                byte[] resultMessage = new byte[messageLengthInBytes + 16];
+                byte[] temporaryArr = new byte[messageLengthInBytes + 16];
                 // Generowanie kluczy wymaganych dla każdej rundy
                 mainKey = keyExpansionRoutine(encryptionKey);
                 // Instrukcja iteracyjna, która dopełni bazową wiadomość o zera na końcu, tak aby całą dłguość wiadomości była
                 // wielokrotnością długości bloku
-                int numberOfAddedBytes = 1;
-                for (int i = 0; i < messageLengthInBytes; i++) {
+                int numberOfAddedBytes = (1 << 4);
+                for (int i = 0; i < messageLengthInBytes - 1; i++) {
                     if (i < inputMessage.length) {
                         temporaryArr[i] = inputMessage[i];
                     } else {
                         if (i == messageLengthInBytes - 1) {
-                            temporaryArr[i] = (byte) numberOfAddedBytes;
+                            temporaryArr[i] = (byte) inputMessage.length;
                         } else {
                             temporaryArr[i] = 0;
                             numberOfAddedBytes++;
                         }
                     }
                 }
+                temporaryArr[messageLengthInBytes - 1] = (byte) numberOfAddedBytes;
 
                 byte[] block = new byte[16];
                 /*
