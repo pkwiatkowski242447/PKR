@@ -4,12 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>pkr.zadanie2.view</groupId>
     <artifactId>ViewProject</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <name>View</name>
 
     <parent>
-        <groupId>pkr.zadanie1</groupId>
-        <artifactId>Zadanie1</artifactId>
+        <artifactId>Zadanie2</artifactId>
+        <groupId>pkr.zadanie2</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
@@ -17,20 +18,19 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.9.2</junit.version>
+        <junit.version>5.8.2</junit.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>19.0.2.1</version>
+            <version>17.0.2</version>
         </dependency>
-
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>19.0.2.1</version>
+            <version>17.0.2</version>
         </dependency>
 
         <dependency>
@@ -39,18 +39,11 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>pkr.zadanie1</groupId>
-            <artifactId>ModelProject</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -74,7 +67,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>pkr.zadanie1.view/pkr.zadanie1.view.AESApplication</mainClass>
+                            <mainClass>pkr.zadanie2.view.view/pkr.zadanie2.view.view.PKRApplication</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
