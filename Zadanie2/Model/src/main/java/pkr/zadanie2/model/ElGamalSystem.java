@@ -1,7 +1,10 @@
 package pkr.zadanie2.model;
 
+import pkr.zadanie2.exceptions.IncorrectMessageDigestAlgorithm;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 public class ElGamalSystem {
@@ -13,7 +16,7 @@ public class ElGamalSystem {
         given file and verifying whether the signature is correct or not.
      */
 
-    private BigInteger pNumber, gNumber, aNumber, hNumber, rNumber, sNo1Number, sNo2Number, reverseOfRNumber;
+    private BigInteger pNumber, gNumber, aNumber, hNumber, rNumber, sNo1Number, sNo2Number, reverseOfRNumber, pNumberMinusOne;
     /*
         givenMessageDigest -> message digest algorithm, which could be chosen by the user.
      */
@@ -31,6 +34,8 @@ public class ElGamalSystem {
 
         MessageDigest givenMessageDigest -> message digest algorithm, which will be used for signing files.
         int selectedPrimeNumberLength -> generated p number length in bits.
+        BigInteger[] publicKey -> array of big numbers containing public key, that is values for gNumber, pNumber,
+        hNumber in that specific order.
 
         @ Returned value:
 
@@ -40,9 +45,44 @@ public class ElGamalSystem {
         for message digest and generated prime numbers length.
      */
 
-    public ElGamalSystem(MessageDigest givenMessageDigest, int selectedPrimeNumberLength) {
-        this.givenMessageDigest = givenMessageDigest;
+    public ElGamalSystem(String givenMessageDigestInString, int selectedPrimeNumberLength, BigInteger[] publicKey) throws IncorrectMessageDigestAlgorithm {
         this.selectedPrimeNumberLength = selectedPrimeNumberLength;
+        if (publicKey != null) {
+            gNumber = publicKey[0];
+            pNumber = publicKey[1];
+            hNumber = publicKey[2];
+        } else {
+            generateKeyMethod();
+        }
+        try {
+            this.givenMessageDigest = MessageDigest.getInstance(givenMessageDigestInString);
+        } catch (NoSuchAlgorithmException noSuchAlgorithmException) {
+            throw new IncorrectMessageDigestAlgorithm("Entered message digest algorithm: " + givenMessageDigestInString + " is incorrect ; Cause: " + noSuchAlgorithmException.getMessage(), noSuchAlgorithmException);
+        }
+    }
+
+    /*
+        @ Method: generateKeyMethod
+
+        @ Parameters: None
+
+        @ Returned value: None
+
+        @ Description: This method is used for generating primeNumber p, and values of gNumber and aNumber
+        and base on these three values hNumber is generated. Since pNumber, hNumber and gNumber create a
+        public key - this name of this method is self-explanatory, and aNumber is private key.
+     */
+
+    public void generateKeyMethod() {
+        boolean isNumberPrime;
+        do {
+            pNumber = BigInteger.probablePrime(selectedPrimeNumberLength + 2, randomIntNumber);
+            isNumberPrime = millerRabinPrimalityTest(pNumber);
+        } while (isNumberPrime);
+        aNumber = new BigInteger(selectedPrimeNumberLength, randomIntNumber);
+        gNumber = new BigInteger(selectedPrimeNumberLength, randomIntNumber);
+        hNumber = gNumber.modPow(aNumber, pNumber);
+        pNumberMinusOne = pNumber.subtract(BigInteger.ONE);
     }
 
     /*
@@ -62,7 +102,19 @@ public class ElGamalSystem {
      */
 
     public BigInteger[] signGivenFile(byte[] byteArrayFromGivenFile) {
-        
+        BigInteger[] generatedSignature = new BigInteger[2];
+        givenMessageDigest.update(byteArrayFromGivenFile);
+        BigInteger messageDigestValue = new BigInteger(1, givenMessageDigest.digest());
+        rNumber = BigInteger.probablePrime(selectedPrimeNumberLength, randomIntNumber);
+        while(!rNumber.gcd(pNumberMinusOne).equals(BigInteger.ONE)) {
+            rNumber = rNumber.nextProbablePrime();
+        };
+        reverseOfRNumber = rNumber.modInverse(pNumberMinusOne);
+        sNo1Number = gNumber.modPow(rNumber, pNumberMinusOne);
+        sNo2Number = (messageDigestValue.subtract(aNumber.multiply(sNo1Number))).multiply(reverseOfRNumber).mod(pNumberMinusOne);
+        generatedSignature[0] = sNo1Number;
+        generatedSignature[1] = sNo2Number;
+        return generatedSignature;
     }
 
     /*
@@ -71,7 +123,7 @@ public class ElGamalSystem {
         @ Parameters:
 
         byte[] byteArrayFromGivenFile -> array of bytes read from a given file.
-        byte[] signatureOnTheFile -> array of bytes representing signature made with ElGamal scheme.
+        BigInteger[] signatureOnTheFile -> array containing both s1 and s2 for signature.
 
         @ Returned value:
 
@@ -82,7 +134,9 @@ public class ElGamalSystem {
         is generated with message digest function).
      */
 
-    public boolean verifyIfSignatureIsCorrect(byte[] byteArrayFromGivenFile, byte[] signatureOnTheFile) {
+    public boolean verifyIfSignatureIsCorrect(byte[] byteArrayFromGivenFile, BigInteger[] signatureOnTheFile) {
+        sNo1Number = signatureOnTheFile[0];
+        sNo2Number = signatureOnTheFile[1];
 
     }
 
