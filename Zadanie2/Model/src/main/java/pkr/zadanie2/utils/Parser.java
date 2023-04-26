@@ -76,11 +76,67 @@ public class Parser {
         lastOnePointer += pNumberLength;
         System.arraycopy(byteArrayFromAFile, lastOnePointer, hNumber, 0, hNumberLength);
 
-        List<byte[]> publicKey = new ArrayList<byte[]>();
+        List<byte[]> publicKey = new ArrayList<>();
         publicKey.add(gNumber);
         publicKey.add(pNumber);
         publicKey.add(hNumber);
         return publicKey;
+    }
+
+    public static byte[] parseSignatureToBeSavedToAFile(BigInteger sNo1Number, BigInteger sNo2Number) {
+        byte[] sNo1NumberInByteArray = sNo1Number.toByteArray();
+        byte[] sNo2NumberInByteArray = sNo2Number.toByteArray();
+        int sNo1NumberArraySize = sNo1NumberInByteArray.length;
+        int sNo2NumberArraySize = sNo2NumberInByteArray.length;
+        byte[] sNo1NumberLengthInByteArray = intToByteArrayConversion(sNo1NumberArraySize);
+        byte[] sNo2NumberLengthInByteArray = intToByteArrayConversion(sNo2NumberArraySize);
+        byte[] finalByteArray = new byte[2 * 4 + 2 + sNo1NumberArraySize + sNo2NumberArraySize];
+        int currentPointer = 0;
+        System.arraycopy(sNo1NumberLengthInByteArray, 0, finalByteArray, currentPointer, sNo1NumberLengthInByteArray.length);
+        finalByteArray[sNo1NumberLengthInByteArray.length] = ':';
+        currentPointer += sNo1NumberLengthInByteArray.length + 1;
+        System.arraycopy(sNo2NumberLengthInByteArray, 0, finalByteArray, currentPointer, sNo2NumberLengthInByteArray.length);
+        finalByteArray[currentPointer + sNo2NumberLengthInByteArray.length] = ':';
+        currentPointer += sNo2NumberLengthInByteArray.length + 1;
+        System.arraycopy(sNo1NumberInByteArray, 0, finalByteArray, currentPointer, sNo1NumberArraySize);
+        currentPointer += sNo1NumberArraySize;
+        System.arraycopy(sNo2NumberInByteArray, 0, finalByteArray, currentPointer, sNo2NumberArraySize);
+        return finalByteArray;
+    }
+
+    public static List<byte[]> parseSignatureToBeShownInsideTheProgram(byte[] byteArrayFromAFile) {
+        int filePositionPointer = 0;
+        int lastOnePointer = 0;
+        while(byteArrayFromAFile[filePositionPointer] != ':') {
+            filePositionPointer++;
+        }
+        byte[] sNo1NumberLengthInArray = new byte[filePositionPointer];
+        System.arraycopy(byteArrayFromAFile, 0, sNo1NumberLengthInArray, 0, filePositionPointer);
+        filePositionPointer++;
+        lastOnePointer = filePositionPointer;
+
+        while(byteArrayFromAFile[filePositionPointer] != ':') {
+            filePositionPointer++;
+        }
+        byte[] sNo2NumberLengthInArray = new byte[filePositionPointer - lastOnePointer + 1];
+        System.arraycopy(byteArrayFromAFile, lastOnePointer, sNo2NumberLengthInArray, 0, filePositionPointer - lastOnePointer + 1);
+        filePositionPointer++;
+        lastOnePointer = filePositionPointer;
+
+        int sNo1NumberLength = byteArrayToIntConversion(sNo1NumberLengthInArray);
+        int sNo2NumberLength = byteArrayToIntConversion(sNo2NumberLengthInArray);
+
+        byte[] sNo1Number = new byte[sNo1NumberLength];
+        byte[] sNo2Number = new byte[sNo2NumberLength];
+
+        System.arraycopy(byteArrayFromAFile, lastOnePointer, sNo1Number, 0, sNo1NumberLength);
+        lastOnePointer += sNo1NumberLength;
+        System.arraycopy(byteArrayFromAFile, lastOnePointer, sNo2Number, 0, sNo2NumberLength);
+
+        List<byte[]> signature = new ArrayList<>();
+        signature.add(sNo1Number);
+        signature.add(sNo2Number);
+        return signature;
     }
 
     public static byte[] intToByteArrayConversion(int someNumber) {

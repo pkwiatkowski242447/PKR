@@ -1,6 +1,7 @@
 package pkr.zadanie2.model;
 
 import pkr.zadanie2.exceptions.IncorrectMessageDigestAlgorithm;
+import pkr.zadanie2.exceptions.NullValueException;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -53,19 +54,45 @@ public class ElGamalSystem {
      */
 
     public byte[] getPNumber() {
-        return pNumber.toByteArray();
+        if (pNumber != null) {
+            return pNumber.toByteArray();
+        }
+        throw new NullValueException("Próbowano odczytać wartość, która jest wskaźnikiem do null'a.");
     }
 
     public byte[] getGNumber() {
-        return gNumber.toByteArray();
+        if (gNumber != null) {
+            return gNumber.toByteArray();
+        }
+        throw new NullValueException("Próbowano odczytać wartość, która jest wskaźnikiem do null'a.");
     }
 
     public byte[] getHNumber() {
-        return hNumber.toByteArray();
+        if (hNumber != null) {
+            return hNumber.toByteArray();
+        }
+        throw new NullValueException("Próbowano odczytać wartość, która jest wskaźnikiem do null'a.");
     }
 
     public byte[] getANumber() {
-        return aNumber.toByteArray();
+        if (aNumber != null) {
+            return aNumber.toByteArray();
+        }
+        throw new NullValueException("Próbowano odczytać wartość, która jest wskaźnikiem do null'a.");
+    }
+
+    public byte[] getsNo1Number() {
+        if (sNo1Number != null) {
+            return sNo1Number.toByteArray();
+        }
+        throw new NullValueException("Próbowano odczytać wartość, która jest wskaźnikiem do null'a.");
+    }
+
+    public byte[] getsNo2Number() {
+        if (sNo2Number != null) {
+            return sNo2Number.toByteArray();
+        }
+        throw new NullValueException("Próbowano odczytać wartość, która jest wskaźnikiem do null'a.");
     }
 
     public void setPublicKey(BigInteger gNumber, BigInteger pNumber, BigInteger hNumber) {

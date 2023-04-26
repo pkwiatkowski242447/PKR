@@ -1,12 +1,14 @@
 import org.junit.jupiter.api.Test;
+import pkr.zadanie2.exceptions.IOManagerReadException;
+import pkr.zadanie2.exceptions.IOManagerWriteException;
 import pkr.zadanie2.exceptions.IncorrectMessageDigestAlgorithm;
 import pkr.zadanie2.model.ElGamalSystem;
+import pkr.zadanie2.utils.IOManager;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ElGamalSystemTest {
 
@@ -57,6 +59,19 @@ public class ElGamalSystemTest {
                 System.out.println("Podpis nie jest prawidłowy.");
             }
         } catch(IncorrectMessageDigestAlgorithm exception) {
+            fail();
+        }
+    }
+
+    @Test
+    public void savePrivateKeyToAFile() {
+        try {
+            ElGamalSystem elGamalSystem = new ElGamalSystem();
+            elGamalSystem.generateKeyMethod();
+            IOManager.writeBytesToAFile("PrivateKey", elGamalSystem.getANumber());
+            byte[] privateKeyFromFile = IOManager.readBytesFromAGivenFile("PrivateKey");
+            assertEquals(new BigInteger(elGamalSystem.getANumber()), new BigInteger(privateKeyFromFile));
+        } catch(IncorrectMessageDigestAlgorithm | IOManagerWriteException | IOManagerReadException exception) {
             fail();
         }
     }

@@ -74,7 +74,7 @@
                         <Font name="Times New Roman" size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="signFileButton" mnemonicParsing="false" onAction="#singBytesInAFile" prefHeight="30.0" prefWidth="175.0" text="Podpisywanie pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                  <Button fx:id="signFileButton" mnemonicParsing="false" onAction="#signBytesInAFile" prefHeight="30.0" prefWidth="175.0" text="Podpisywanie pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
                      <font>
                         <Font name="Times New Roman" size="14.0" />
                      </font>
