@@ -41,7 +41,6 @@ public class ElGamalSystem {
      */
 
     public ElGamalSystem() throws IncorrectMessageDigestAlgorithm {
-        generateKeyMethod();
         try {
             this.givenMessageDigest = MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException noSuchAlgorithmException) {
@@ -63,6 +62,10 @@ public class ElGamalSystem {
 
     public byte[] getHNumber() {
         return hNumber.toByteArray();
+    }
+
+    public byte[] getANumber() {
+        return aNumber.toByteArray();
     }
 
     public void setPublicKey(BigInteger gNumber, BigInteger pNumber, BigInteger hNumber) {

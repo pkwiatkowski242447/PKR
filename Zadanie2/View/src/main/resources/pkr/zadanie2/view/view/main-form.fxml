@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" maxHeight="600.0" maxWidth="800.0" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" spacing="15.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/19" fx:controller="pkr.zadanie2.view.view.UserActionController">
+<VBox alignment="TOP_CENTER" maxHeight="600.0" maxWidth="800.0" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" spacing="15.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pkr.zadanie2.view.view.UserActionController">
     <padding>
         <Insets bottom="10.0" left="25.0" right="25.0" top="10.0" />
     </padding>
@@ -169,6 +169,7 @@
           <ColumnConstraints />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
@@ -191,6 +192,11 @@
                </font>
             </Button>
             <Button fx:id="savePrivateKeyButton" mnemonicParsing="false" onAction="#savePrivateKeyToAFile" prefHeight="30.0" prefWidth="175.0" text="Zapisz klucz prywatny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+               <font>
+                  <Font name="Times New Roman" size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="generateKeysButton" mnemonicParsing="false" onAction="#generateAllTheKeys" prefHeight="30.0" prefWidth="175.0" text="Generuj klucze" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                <font>
                   <Font name="Times New Roman" size="14.0" />
                </font>
