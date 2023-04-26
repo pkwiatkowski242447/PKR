@@ -20,22 +20,17 @@ public class ElGamalSystem {
     /*
         givenMessageDigest -> message digest algorithm, which could be chosen by the user.
      */
-    private MessageDigest givenMessageDigest;
-    private Random randomIntNumber = new Random();
+    private final MessageDigest givenMessageDigest;
+    private final Random randomIntNumber = new Random();
     /*
         selectedPrimeNumberLength -> number of generated prime numbers in bits.
      */
-    private int selectedPrimeNumberLength;
+    private final int selectedPrimeNumberLength = 1024;
 
     /*
         @ Method: ElGamalSystem -> Constructor
 
-        @ Parameters:
-
-        MessageDigest givenMessageDigest -> message digest algorithm, which will be used for signing files.
-        int selectedPrimeNumberLength -> generated p number length in bits.
-        BigInteger[] publicKey -> array of big numbers containing public key, that is values for gNumber, pNumber,
-        hNumber in that specific order.
+        @ Parameters: None
 
         @ Returned value:
 
@@ -45,20 +40,39 @@ public class ElGamalSystem {
         for message digest and generated prime numbers length.
      */
 
-    public ElGamalSystem(String givenMessageDigestInString, int selectedPrimeNumberLength, BigInteger[] publicKey) throws IncorrectMessageDigestAlgorithm {
-        this.selectedPrimeNumberLength = selectedPrimeNumberLength;
-        if (publicKey != null) {
-            gNumber = publicKey[0];
-            pNumber = publicKey[1];
-            hNumber = publicKey[2];
-        } else {
-            generateKeyMethod();
-        }
+    public ElGamalSystem() throws IncorrectMessageDigestAlgorithm {
+        generateKeyMethod();
         try {
-            this.givenMessageDigest = MessageDigest.getInstance(givenMessageDigestInString);
+            this.givenMessageDigest = MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException noSuchAlgorithmException) {
-            throw new IncorrectMessageDigestAlgorithm("Entered message digest algorithm: " + givenMessageDigestInString + " is incorrect ; Cause: " + noSuchAlgorithmException.getMessage(), noSuchAlgorithmException);
+            throw new IncorrectMessageDigestAlgorithm("Entered message digest algorithm: SHA-512  is incorrect ; Cause: " + noSuchAlgorithmException.getMessage(), noSuchAlgorithmException);
         }
+    }
+
+    /*
+        @ Getters:
+     */
+
+    public byte[] getPNumber() {
+        return pNumber.toByteArray();
+    }
+
+    public byte[] getGNumber() {
+        return gNumber.toByteArray();
+    }
+
+    public byte[] getHNumber() {
+        return hNumber.toByteArray();
+    }
+
+    public void setPublicKey(BigInteger gNumber, BigInteger pNumber, BigInteger hNumber) {
+        this.hNumber = hNumber;
+        this.pNumber = pNumber;
+        this.gNumber = gNumber;
+    }
+
+    public void setPrivateKey(BigInteger aNumber) {
+        this.aNumber = aNumber;
     }
 
     /*
@@ -76,13 +90,13 @@ public class ElGamalSystem {
     public void generateKeyMethod() {
         boolean isNumberPrime;
         do {
-            pNumber = BigInteger.probablePrime(selectedPrimeNumberLength + 2, randomIntNumber);
+            pNumber = BigInteger.probablePrime(selectedPrimeNumberLength, randomIntNumber);
             isNumberPrime = millerRabinPrimalityTest(pNumber);
-        } while (isNumberPrime);
-        aNumber = new BigInteger(selectedPrimeNumberLength, randomIntNumber);
-        gNumber = new BigInteger(selectedPrimeNumberLength, randomIntNumber);
-        hNumber = gNumber.modPow(aNumber, pNumber);
+        } while (!isNumberPrime);
         pNumberMinusOne = pNumber.subtract(BigInteger.ONE);
+        aNumber = getRandomBigIntegerSmallerThanN(BigInteger.ONE, pNumberMinusOne);
+        gNumber = getRandomBigIntegerSmallerThanN(BigInteger.ONE, pNumberMinusOne);
+        hNumber = gNumber.modPow(aNumber, pNumber);
     }
 
     /*
@@ -110,7 +124,7 @@ public class ElGamalSystem {
             rNumber = rNumber.nextProbablePrime();
         };
         reverseOfRNumber = rNumber.modInverse(pNumberMinusOne);
-        sNo1Number = gNumber.modPow(rNumber, pNumberMinusOne);
+        sNo1Number = gNumber.modPow(rNumber, pNumber);
         sNo2Number = (messageDigestValue.subtract(aNumber.multiply(sNo1Number))).multiply(reverseOfRNumber).mod(pNumberMinusOne);
         generatedSignature[0] = sNo1Number;
         generatedSignature[1] = sNo2Number;
@@ -137,7 +151,14 @@ public class ElGamalSystem {
     public boolean verifyIfSignatureIsCorrect(byte[] byteArrayFromGivenFile, BigInteger[] signatureOnTheFile) {
         sNo1Number = signatureOnTheFile[0];
         sNo2Number = signatureOnTheFile[1];
-
+        givenMessageDigest.update(byteArrayFromGivenFile);
+        BigInteger generatedHashValue = new BigInteger(1, givenMessageDigest.digest());
+        BigInteger valueToBeComparedNo1 = gNumber.modPow(generatedHashValue, pNumber);
+        BigInteger valueToBeComparedNo2 = hNumber.modPow(sNo1Number, pNumber).multiply(sNo1Number.modPow(sNo2Number, pNumber)).mod(pNumber);
+        if (valueToBeComparedNo1.compareTo(valueToBeComparedNo2) == 0) {
+            return true;
+        }
+        return false;
     }
 
     /*
@@ -157,6 +178,58 @@ public class ElGamalSystem {
      */
 
     public boolean millerRabinPrimalityTest(BigInteger numberThatIsSupposedToBePrime) {
+        // Choosing randomNumber value, that fits requirement: 1 < randomNumber < pNumber
+        BigInteger randomNumber = getRandomBigIntegerSmallerThanN(BigInteger.ONE, numberThatIsSupposedToBePrime);
+        // Finding mNumber value, that: pNumber - 1 = 2 ^ s * mNumber
+        BigInteger mNumber = numberThatIsSupposedToBePrime.subtract(BigInteger.ONE);
+        do {
+            mNumber = mNumber.divide(BigInteger.TWO);
+        } while(mNumber.mod(BigInteger.TWO).compareTo(BigInteger.ZERO) == 0);
+        // Checking whether NWD(randomNumber, pNumber) != 1 : if yes then the number is composite so it is not a prime
+        // in the other case: it fulfills requirement for being a prime.
+        if (randomNumber.gcd(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0) {
+            return false;
+        }
+        // Calculating y0Value in order to check if y0 = 1 (mod n)
+        // if it is then it means that numberThatIsSupposedToBePrime is actually a prime
+        BigInteger y0Value = randomNumber.modPow(mNumber, numberThatIsSupposedToBePrime);
+        if (y0Value.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) == 0) {
+            return true;
+        }
+        BigInteger yIValue;
+        do {
+            yIValue = y0Value.modPow(BigInteger.TWO, numberThatIsSupposedToBePrime);
+            y0Value = yIValue;
+        } while(yIValue.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0
+                && yIValue.mod(numberThatIsSupposedToBePrime).compareTo(new BigInteger("-1")) != 0);
+        if (yIValue.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0) {
+            return false;
+        }
+        return true;
+    }
 
+    /*
+        @ Method: getRandomBigIntegerSmallerThanN
+
+        @ Parameters:
+
+        BigInteger minimumValue -> minimum value of big integer that can be returned
+        BigInteger maximumValue -> maximum value of big integer that can be returned
+
+        @ Returned value:
+
+        BitInteger -> reference to BigInteger object, which contains value between minimumValue and
+        maximumValue
+
+        @ Description: The aim of this method is to create a BigInteger object, which value is between
+        minimumValue and maximumValue.
+     */
+
+    private BigInteger getRandomBigIntegerSmallerThanN(BigInteger minimumValue, BigInteger maximumValue) {
+        BigInteger result;
+        do {
+            result = new BigInteger(maximumValue.bitLength(), randomIntNumber);
+        } while(result.compareTo(minimumValue) <= 0 || result.compareTo(maximumValue) >= 0);
+        return result;
     }
 }
