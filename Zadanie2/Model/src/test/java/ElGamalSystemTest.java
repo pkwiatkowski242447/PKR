@@ -16,6 +16,7 @@ public class ElGamalSystemTest {
     public void signatureGenerationTestAndVerifyingIt() {
         try {
             ElGamalSystem elGamal = new ElGamalSystem();
+            elGamal.generateKeyMethod();
             assertNotNull(elGamal);
             System.out.println("=== Debug ===");
             System.out.println(new BigInteger(elGamal.getGNumber()));
@@ -41,6 +42,7 @@ public class ElGamalSystemTest {
     public void signatureGenerationTestAndVerifyingWithOtherSignature() {
         try {
             ElGamalSystem elGamal = new ElGamalSystem();
+            elGamal.generateKeyMethod();
             assertNotNull(elGamal);
             System.out.println("=== Debug ===");
             System.out.println(new BigInteger(elGamal.getGNumber()));

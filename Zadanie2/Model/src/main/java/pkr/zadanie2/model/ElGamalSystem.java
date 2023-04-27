@@ -26,7 +26,8 @@ public class ElGamalSystem {
     /*
         selectedPrimeNumberLength -> number of generated prime numbers in bits.
      */
-    private final int selectedPrimeNumberLength = 1024;
+    private int selectedPrimeNumberLength = 1024;
+    private int numberOfIterationsInMillerRabinTest = 32;
 
     /*
         @ Method: ElGamalSystem -> Constructor
@@ -215,27 +216,37 @@ public class ElGamalSystem {
         do {
             mNumber = mNumber.divide(BigInteger.TWO);
         } while(mNumber.mod(BigInteger.TWO).compareTo(BigInteger.ZERO) == 0);
-        // Checking whether NWD(randomNumber, pNumber) != 1 : if yes then the number is composite so it is not a prime
-        // in the other case: it fulfills requirement for being a prime.
-        if (randomNumber.gcd(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0) {
-            return false;
+
+        boolean testResult = true;
+
+        for (int i = 0; i < numberOfIterationsInMillerRabinTest; i++) {
+            // Checking whether NWD(randomNumber, pNumber) != 1 : if yes then the number is composite so it is not a prime
+            // in the other case: it fulfills requirement for being a prime.
+            if (randomNumber.gcd(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0) {
+                testResult = false;
+                break;
+            }
+            // Calculating y0Value in order to check if y0 = 1 (mod n)
+            // if it is then it means that numberThatIsSupposedToBePrime is actually a prime
+            BigInteger y0Value = randomNumber.modPow(mNumber, numberThatIsSupposedToBePrime);
+            if (y0Value.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) == 0) {
+                testResult = true;
+                continue;
+            }
+            BigInteger yIValue;
+            do {
+                yIValue = y0Value.modPow(BigInteger.TWO, numberThatIsSupposedToBePrime);
+                y0Value = yIValue;
+            } while(yIValue.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0
+                    && yIValue.mod(numberThatIsSupposedToBePrime).compareTo(new BigInteger("-1")) != 0);
+            if (yIValue.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0) {
+                testResult = false;
+                break;
+            } else {
+                testResult = true;
+            }
         }
-        // Calculating y0Value in order to check if y0 = 1 (mod n)
-        // if it is then it means that numberThatIsSupposedToBePrime is actually a prime
-        BigInteger y0Value = randomNumber.modPow(mNumber, numberThatIsSupposedToBePrime);
-        if (y0Value.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) == 0) {
-            return true;
-        }
-        BigInteger yIValue;
-        do {
-            yIValue = y0Value.modPow(BigInteger.TWO, numberThatIsSupposedToBePrime);
-            y0Value = yIValue;
-        } while(yIValue.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0
-                && yIValue.mod(numberThatIsSupposedToBePrime).compareTo(new BigInteger("-1")) != 0);
-        if (yIValue.mod(numberThatIsSupposedToBePrime).compareTo(BigInteger.ONE) != 0) {
-            return false;
-        }
-        return true;
+        return testResult;
     }
 
     /*

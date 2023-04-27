@@ -274,6 +274,6 @@ public class UserActionController {
     private void displayPrivateKey() {
         StringBuilder privateKeyBuilder = new StringBuilder();
         privateKeyBuilder.append('(').append(new BigInteger(elGamalSystem.getANumber()).toString(16)).append(')');
-        signatureTextArea.setText(privateKeyBuilder.toString());
+        privateKeyTextField.setText(privateKeyBuilder.toString());
     }
 }
