@@ -108,8 +108,12 @@ public class UserActionController {
     @FXML
     public void generateSignature() {
         byte[] contentToSign = contentTextArea.getText().getBytes(StandardCharsets.UTF_8);
-        signature = elGamalSystem.signGivenFile(contentToSign);
-        displaySignature();
+        if (contentToSign.length != 0) {
+            signature = elGamalSystem.signGivenFile(contentToSign);
+            displaySignature();
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Brak zawartości do wygenerowania podpisu", "W polu zawartości nie znajduje się żadna zawartość do sporządznenia podpisu cyfrowego");
+        }
     }
 
     @FXML
@@ -121,8 +125,12 @@ public class UserActionController {
         if (pathToFile != null) {
             try {
                 byte[] contentToSign = IOManager.readBytesFromAGivenFile(pathToFile);
-                signature = elGamalSystem.signGivenFile(contentToSign);
-                displaySignature();
+                if (contentToSign.length != 0) {
+                    signature = elGamalSystem.signGivenFile(contentToSign);
+                    displaySignature();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Błąd", "Błąd zawartość w pliku", "Podany plik jest pusty i nie posiada tym samym zawartości do podpisania.");
+                }
             } catch (IOManagerReadException readException) {
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Błąd wczytywania zawartości pliku do podpisania", readException.getMessage());
             }
@@ -132,11 +140,17 @@ public class UserActionController {
     @FXML
     public void verifySignature() {
         byte[] contentToCheckSignature = contentTextArea.getText().getBytes(StandardCharsets.UTF_8);
-        boolean isCorrect = elGamalSystem.verifyIfSignatureIsCorrect(contentToCheckSignature, signature);
-        if (isCorrect) {
-            showAlert(Alert.AlertType.INFORMATION, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy zgadza się z zawartością, pod którą został złożony");
+        if (contentToCheckSignature.length == 0) {
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Brak zawartości do weryfikacji podpisu", "W polu zawartości nie znajduje się żadna zawartość do weryfikacji podpisu cyfrowego");
+        } else if (signature[0] == null || signature[1] == null) {
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Brak podpisu cyfrowego do weryfikacji", "W polu podpisu cyfrowego nie znajduje się żadna zawartość do weryfikacji");
         } else {
-            showAlert(Alert.AlertType.ERROR, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy nie zgadza się z zawartością, pod którą został złożony");
+            boolean isCorrect = elGamalSystem.verifyIfSignatureIsCorrect(contentToCheckSignature, signature);
+            if (isCorrect) {
+                showAlert(Alert.AlertType.INFORMATION, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy zgadza się z zawartością, pod którą został złożony");
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy nie zgadza się z zawartością, pod którą został złożony");
+            }
         }
     }
 
@@ -149,11 +163,17 @@ public class UserActionController {
         if (pathToFile != null) {
             try {
                 byte[] contentToVerifyFromAFile = IOManager.readBytesFromAGivenFile(pathToFile);
-                boolean isCorrect = elGamalSystem.verifyIfSignatureIsCorrect(contentToVerifyFromAFile, signature);
-                if (isCorrect) {
-                    showAlert(Alert.AlertType.INFORMATION, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy zgadza się z zawartością, pod którą został złożony");
+                if (contentToVerifyFromAFile.length == 0) {
+                    showAlert(Alert.AlertType.ERROR, "Błąd", "Błąd zawartości w pliku", "W podanym pliku nie ma zawartości do weryfikacji podpisu cyfrowego");
+                } else if (signature[0] == null || signature[1] == null) {
+                    showAlert(Alert.AlertType.ERROR, "Błąd", "Błąd podpisu cyfrowego", "W polu podpisu cyfrowego nie ma zawartości w celu weryfikacji");
                 } else {
-                    showAlert(Alert.AlertType.ERROR, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy nie zgadza się z zawartością, pod którą został złożony");
+                    boolean isCorrect = elGamalSystem.verifyIfSignatureIsCorrect(contentToVerifyFromAFile, signature);
+                    if (isCorrect) {
+                        showAlert(Alert.AlertType.INFORMATION, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy zgadza się z zawartością, pod którą został złożony");
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Wynik sprawdzenia podpisu cyfrowego", "Wynik porównania", "Podpis cyfrowy nie zgadza się z zawartością, pod którą został złożony");
+                    }
                 }
             } catch(IOManagerReadException readException) {
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Błąd odczytu zawartości pliku do weryfikacji podpisu", readException.getMessage());
