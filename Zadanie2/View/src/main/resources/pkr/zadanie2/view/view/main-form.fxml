@@ -3,213 +3,225 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" maxHeight="600.0" maxWidth="800.0" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" spacing="15.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pkr.zadanie2.view.view.UserActionController">
+<VBox alignment="TOP_CENTER" maxHeight="800.0" maxWidth="1000.0" minHeight="800.0" minWidth="1000.0" prefHeight="800.0" prefWidth="1000.0" spacing="15.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pkr.zadanie2.view.view.UserActionController">
     <padding>
         <Insets bottom="10.0" left="25.0" right="25.0" top="10.0" />
     </padding>
-   <children>
-      <Label alignment="CENTER" text="Podstawy kryptografii - Zadanie 2" textAlignment="CENTER">
-         <font>
-            <Font name="Times New Roman Bold" size="24.0" />
-         </font>
-         <padding>
-            <Insets bottom="5.0" top="5.0" />
-         </padding>
-      </Label>
-      <GridPane>
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="400.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="20.0" />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="400.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints maxHeight="40.0" minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="150.0" prefHeight="150.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Label text="Zawartość" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="18.0" />
-               </font>
-            </Label>
-            <Label text="Podpis cyfrowy" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="18.0" />
-               </font>
-            </Label>
-            <TextArea fx:id="contentTextArea" prefHeight="150.0" prefWidth="200.0" promptText="Wpisz tekst do podpisania lub wczytaj zawartość z pliku" wrapText="true" GridPane.rowIndex="1">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </TextArea>
-            <TextArea fx:id="signatureTextArea" prefHeight="150.0" prefWidth="200.0" promptText="Wygenerowany podpis cyfrowy" wrapText="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </TextArea>
-            <GridPane GridPane.rowIndex="2">
-              <columnConstraints>
+    <children>
+        <Label alignment="CENTER" text="Podstawy kryptografii - Zadanie 2" textAlignment="CENTER">
+            <font>
+                <Font name="Times New Roman Bold" size="24.0" />
+            </font>
+            <padding>
+                <Insets bottom="5.0" top="5.0" />
+            </padding>
+        </Label>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="400.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="20.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="400.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="40.0" minHeight="35.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="200.0" prefHeight="200.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <Label text="Zawartość" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman" size="18.0" />
+                    </font>
+                </Label>
+                <Label text="Podpis cyfrowy" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman" size="18.0" />
+                    </font>
+                </Label>
+                <TextArea fx:id="contentTextArea" prefHeight="150.0" prefWidth="200.0" promptText="Wpisz tekst do podpisania lub wczytaj zawartość z pliku" wrapText="true" GridPane.rowIndex="1">
+                    <font>
+                        <Font name="Times New Roman" size="14.0" />
+                    </font>
+                </TextArea>
+                <TextArea fx:id="signatureTextArea" prefHeight="150.0" prefWidth="200.0" promptText="Wygenerowany podpis cyfrowy" wrapText="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <font>
+                        <Font name="Times New Roman" size="14.0" />
+                    </font>
+                </TextArea>
+                <GridPane GridPane.rowIndex="2">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <Button fx:id="generateSignatureButton" mnemonicParsing="false" onAction="#generateSignature" prefHeight="30.0" prefWidth="175.0" text="Generowanie podpisu" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                            <GridPane.margin>
+                                <Insets />
+                            </GridPane.margin>
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="signFileButton" mnemonicParsing="false" onAction="#signBytesInAFile" prefHeight="30.0" prefWidth="175.0" text="Podpisywanie pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="saveContentButton" mnemonicParsing="false" onAction="#saveContentToAFile" prefHeight="30.0" prefWidth="175.0" text="Zapis do pliku" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="readContentButton" mnemonicParsing="false" onAction="#readContentFromAFile" prefHeight="30.0" prefWidth="175.0" text="Wczytywanie z pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </GridPane>
+                <GridPane GridPane.columnIndex="2" GridPane.rowIndex="2">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <Button fx:id="verifySignatureButton" mnemonicParsing="false" onAction="#verifySignature" prefHeight="30.0" prefWidth="175.0" text="Weryfikacja podpisu" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                            <GridPane.margin>
+                                <Insets />
+                            </GridPane.margin>
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="verifyFileButton" mnemonicParsing="false" onAction="#verifyBytesInAFile" prefHeight="30.0" prefWidth="175.0" text="Weryfikacja podpisu pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="saveSignatureButton" mnemonicParsing="false" onAction="#saveSignatureToAFile" prefHeight="30.0" prefWidth="175.0" text="Zapis do pliku" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="readSignatureButton" mnemonicParsing="false" onAction="#readSignatureFromAFile" prefHeight="30.0" prefWidth="175.0" text="Wczytywanie z pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                            <font>
+                                <Font name="Times New Roman" size="14.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </GridPane>
+            </children>
+        </GridPane>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="500.0" prefWidth="500.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="120.0" prefHeight="120.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="120.0" prefHeight="120.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <Label text="Klucz publiczny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman" size="18.0" />
+                    </font>
+                </Label>
+                <Label text="Klucz prywatny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman" size="18.0" />
+                    </font>
+                </Label>
+                <TextArea fx:id="publicKeyTextField" editable="false" maxHeight="110.0" maxWidth="450.0" prefHeight="110.0" prefWidth="450.0" promptText="Wartość klucza publicznego" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman" size="14.0" />
+                    </font>
+                </TextArea>
+                <TextArea fx:id="privateKeyTextField" editable="false" maxHeight="110.0" maxWidth="450.0" prefHeight="100.0" prefWidth="450.0" promptText="Wartość klucza prywatnego" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman" size="14.0" />
+                    </font>
+                </TextArea>
+            </children>
+            <padding>
+                <Insets left="100.0" right="100.0" />
+            </padding>
+        </GridPane>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            </columnConstraints>
+            <rowConstraints>
                 <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Button fx:id="generateSignatureButton" mnemonicParsing="false" onAction="#generateSignature" prefHeight="30.0" prefWidth="175.0" text="Generowanie podpisu" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets />
-                     </GridPane.margin>
-                     <font>
-                        <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="signFileButton" mnemonicParsing="false" onAction="#signBytesInAFile" prefHeight="30.0" prefWidth="175.0" text="Podpisywanie pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-                     <font>
-                        <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="saveContentButton" mnemonicParsing="false" onAction="#saveContentToAFile" prefHeight="30.0" prefWidth="175.0" text="Zapis do pliku" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-                     <font>
-                        <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="readContentButton" mnemonicParsing="false" onAction="#readContentFromAFile" prefHeight="30.0" prefWidth="175.0" text="Wczytywanie z pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-                     <font>
-                        <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-               </children>
-            </GridPane>
-            <GridPane GridPane.columnIndex="2" GridPane.rowIndex="2">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
                 <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Button fx:id="verifySignatureButton" mnemonicParsing="false" onAction="#verifySignature" prefHeight="30.0" prefWidth="175.0" text="Weryfikacja podpisu" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-                     <GridPane.margin>
-                        <Insets />
-                     </GridPane.margin>
-                     <font>
+            </rowConstraints>
+            <children>
+                <Button fx:id="savePublicKeyButton" mnemonicParsing="false" onAction="#savePublicKeyToAFile" prefHeight="30.0" prefWidth="180.0" text="Zapisz klucz publiczny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                    <font>
                         <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="verifyFileButton" mnemonicParsing="false" onAction="#verifyBytesInAFile" prefHeight="30.0" prefWidth="175.0" text="Weryfikacja podpisu pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-                     <font>
+                    </font>
+                </Button>
+                <Button fx:id="readPublicKeyButton" mnemonicParsing="false" onAction="#readPublicKeyFromAFile" prefHeight="30.0" prefWidth="180.0" text="Wczytaj klucz publiczny" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                    <font>
                         <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="saveSignatureButton" mnemonicParsing="false" onAction="#saveSignatureToAFile" prefHeight="30.0" prefWidth="175.0" text="Zapis do pliku" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-                     <font>
+                    </font>
+                </Button>
+                <Button fx:id="readPrivateKeyButton" mnemonicParsing="false" onAction="#readPrivateKeyFromAFile" prefHeight="30.0" prefWidth="180.0" text="Wczytaj klucz prywatny" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <font>
                         <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="readSignatureButton" mnemonicParsing="false" onAction="#readSignatureFromAFile" prefHeight="30.0" prefWidth="175.0" text="Wczytywanie z pliku" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-                     <font>
+                    </font>
+                </Button>
+                <Button fx:id="savePrivateKeyButton" mnemonicParsing="false" onAction="#savePrivateKeyToAFile" prefHeight="30.0" prefWidth="180.0" text="Zapisz klucz prywatny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                    <font>
                         <Font name="Times New Roman" size="14.0" />
-                     </font>
-                  </Button>
-               </children>
-            </GridPane>
-         </children>
-      </GridPane>
-      <GridPane>
-        <columnConstraints>
-          <ColumnConstraints />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="300.0" prefWidth="300.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="50.0" prefHeight="50.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Label text="Klucz publiczny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="18.0" />
-               </font>
-            </Label>
-            <Label text="Klucz prywatny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="18.0" />
-               </font>
-            </Label>
-            <TextField fx:id="publicKeyTextField" alignment="CENTER" editable="false" maxWidth="300.0" prefHeight="40.0" prefWidth="200.0" promptText="Wartość klucza publicznego" GridPane.columnIndex="2" GridPane.halignment="CENTER">
+                    </font>
+                </Button>
+                <Button fx:id="generateKeysButton" mnemonicParsing="false" onAction="#generateAllTheKeys" prefHeight="30.0" prefWidth="180.0" text="Generuj klucze" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman" size="14.0" />
+                    </font>
+                </Button>
+            <MenuButton mnemonicParsing="false" prefHeight="30.0" prefWidth="180.0" text="Długość liczby pierwszej" textAlignment="CENTER" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+              <items>
+                  <MenuItem mnemonicParsing="false" onAction="#setPrimeNumberSize256" text="256 bit" />
+                <MenuItem mnemonicParsing="false" onAction="#setPrimeNumberSize512" text="512 bit" />
+                <MenuItem mnemonicParsing="false" onAction="#setPrimeNumberSize1024" text="1024 bit" />
+                  <MenuItem mnemonicParsing="false" onAction="#setPrimeNumberSize2048" text="2048 bit" />
+              </items>
                <font>
                   <Font name="Times New Roman" size="14.0" />
                </font>
-            </TextField>
-            <TextField fx:id="privateKeyTextField" alignment="CENTER" editable="false" maxWidth="300.0" prefHeight="40.0" prefWidth="200.0" promptText="Wartość klucza prywatnego" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </TextField>
-         </children>
-         <padding>
-            <Insets left="100.0" right="100.0" />
-         </padding>
-      </GridPane>
-      <GridPane>
-        <columnConstraints>
-          <ColumnConstraints />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Button fx:id="savePublicKeyButton" mnemonicParsing="false" onAction="#savePublicKeyToAFile" prefHeight="30.0" prefWidth="175.0" text="Zapisz klucz publiczny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="readPublicKeyButton" mnemonicParsing="false" onAction="#readPublicKeyFromAFile" prefHeight="30.0" prefWidth="175.0" text="Wczytaj klucz publiczny" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="readPrivateKeyButton" mnemonicParsing="false" onAction="#readPrivateKeyFromAFile" prefHeight="30.0" prefWidth="175.0" text="Wczytaj klucz prywatny" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="savePrivateKeyButton" mnemonicParsing="false" onAction="#savePrivateKeyToAFile" prefHeight="30.0" prefWidth="175.0" text="Zapisz klucz prywatny" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="generateKeysButton" mnemonicParsing="false" onAction="#generateAllTheKeys" prefHeight="30.0" prefWidth="175.0" text="Generuj klucze" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-               <font>
-                  <Font name="Times New Roman" size="14.0" />
-               </font>
-            </Button>
-         </children>
-         <padding>
-            <Insets left="100.0" right="100.0" />
-         </padding>
-      </GridPane>
-      <Button fx:id="authorsButton" mnemonicParsing="false" onAction="#showAuthorsData" prefHeight="30.0" prefWidth="150.0" text="Autorzy programu">
-         <font>
-            <Font name="Times New Roman" size="14.0" />
-         </font>
-      </Button>
-   </children>
+            </MenuButton>
+            </children>
+            <padding>
+                <Insets left="100.0" right="100.0" />
+            </padding>
+        </GridPane>
+        <Button fx:id="authorsButton" mnemonicParsing="false" onAction="#showAuthorsData" prefHeight="30.0" prefWidth="150.0" text="Autorzy programu">
+            <font>
+                <Font name="Times New Roman" size="14.0" />
+            </font>
+        </Button>
+    </children>
 </VBox>

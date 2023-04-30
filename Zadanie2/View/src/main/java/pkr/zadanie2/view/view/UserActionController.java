@@ -22,12 +22,13 @@ public class UserActionController {
     @FXML
     private TextArea signatureTextArea;
     @FXML
-    private TextField publicKeyTextField;
+    private TextArea publicKeyTextField;
     @FXML
-    private TextField privateKeyTextField;
+    private TextArea privateKeyTextField;
 
     private ElGamalSystem elGamalSystem;
     private BigInteger[] signature = new BigInteger[2];
+    private int primeNumberSizeInBits = 1024;
 
     @FXML
     public void initialize() {
@@ -37,6 +38,7 @@ public class UserActionController {
             showAlert(Alert.AlertType.ERROR, "Błąd", "Wstąpił błąd", exception.getMessage());
         }
         elGamalSystem.generateKeyMethod();
+        elGamalSystem.setSelectedPrimeNumberLength(primeNumberSizeInBits);
         displayKeys();
     }
 
@@ -231,6 +233,7 @@ public class UserActionController {
 
     @FXML
     public void generateAllTheKeys() {
+        elGamalSystem.setSelectedPrimeNumberLength(primeNumberSizeInBits);
         elGamalSystem.generateKeyMethod();
         displayKeys();
     }
@@ -254,26 +257,44 @@ public class UserActionController {
 
     private void displayKeys() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append('(');
         stringBuilder.append(new BigInteger(elGamalSystem.getGNumber()).toString(16));
-        stringBuilder.append(", ");
+        stringBuilder.append("\n\n");
         stringBuilder.append(new BigInteger(elGamalSystem.getPNumber()).toString(16));
-        stringBuilder.append(", ");
+        stringBuilder.append("\n\n");
         stringBuilder.append(new BigInteger(elGamalSystem.getHNumber()).toString(16));
-        stringBuilder.append(')');
         publicKeyTextField.setText(stringBuilder.toString());
-        privateKeyTextField.setText('(' + new BigInteger(elGamalSystem.getANumber()).toString(16) + ')');
+        privateKeyTextField.setText(new BigInteger(elGamalSystem.getANumber()).toString(16));
     }
 
     private void displaySignature() {
         StringBuilder signatureBuilder = new StringBuilder();
-        signatureBuilder.append('(').append(signature[0].toString(16)).append(", ").append(signature[1].toString(16)).append(')');
+        signatureBuilder.append(signature[0].toString(16)).append("\n\n").append(signature[1].toString(16));
         signatureTextArea.setText(signatureBuilder.toString());
     }
 
     private void displayPrivateKey() {
         StringBuilder privateKeyBuilder = new StringBuilder();
-        privateKeyBuilder.append('(').append(new BigInteger(elGamalSystem.getANumber()).toString(16)).append(')');
+        privateKeyBuilder.append(new BigInteger(elGamalSystem.getANumber()).toString(16));
         privateKeyTextField.setText(privateKeyBuilder.toString());
+    }
+
+    @FXML
+    public void setPrimeNumberSize256() {
+        primeNumberSizeInBits = 256;
+    }
+
+    @FXML
+    public void setPrimeNumberSize512() {
+        primeNumberSizeInBits = 512;
+    }
+
+    @FXML
+    public void setPrimeNumberSize1024() {
+        primeNumberSizeInBits = 1024;
+    }
+
+    @FXML
+    public void setPrimeNumberSize2048() {
+        primeNumberSizeInBits = 2048;
     }
 }

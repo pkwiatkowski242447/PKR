@@ -6,6 +6,23 @@ import java.util.List;
 
 public class Parser {
 
+    /*
+        @ Method: parseForSavingToAFile
+
+        @ Parameters:
+
+        * BigInteger gNumber -> BigInteger value of gNumber. It is one of three elements of public key.
+        * BigInteger pNumber -> BigInteger value of pNumber. It is one of three elements of public key.
+        * BigInteger hNumber -> BigInteger value of hNumber. It is one of three elements of public key.
+
+        @ Returns: Byte array containing three elements of public key: gNumber, pNumber and hNumber, that can be saved
+        to a file.
+
+        @ Description: This method is used for parsing public key to a form savable to a file. It is worth noting,
+        that this array contains also sizes of byte arrays containing this numbers
+        so that they can be parsed back to big integer form even though they can have variable size.
+     */
+
     public static byte[] parseForSavingToAFile(BigInteger gNumber, BigInteger pNumber, BigInteger hNumber) {
         byte[] gNumberInByteArray = gNumber.toByteArray();
         byte[] pNumberInByteArray = pNumber.toByteArray();
@@ -34,6 +51,22 @@ public class Parser {
         System.arraycopy(hNumberInByteArray, 0, finalByteArray, currentPointer, hNumberArraySize);
         return finalByteArray;
     }
+
+    /*
+        @ Method: parseByteArrayReadFromAFile
+
+        @ Parameters:
+
+        * byte[] byteArrayFromAFile -> byte array read from a file, that contains gNumber, pNumber and hNumber
+        formatted by above method.
+
+        @ Returns:
+
+        * List<byte[]> -> list of byte arrays representing gNumber, pNumber and hNumber in that specific order.
+
+        @ Description: This method is used for parsing back public key saved to a file, to individual values
+        of pNumber, gNumber and hNumber, used in ElGamalSystem.
+     */
 
     public static List<byte[]> parseByteArrayReadFromAFile(byte[] byteArrayFromAFile) {
         int filePositionPointer = 0;
@@ -83,6 +116,22 @@ public class Parser {
         return publicKey;
     }
 
+    /*
+        @ Method: parseSignatureToBeSavedToAFile
+
+        @ Parameters:
+
+        * BigInteger sNo1Number -> First element of signature, made with use of ElGamal crypto-system.
+        * BigInteger sNo2Number -> Second element of signature, made with use of ElGamal crypto-system.
+
+        @ Returns:
+
+        * byte[] -> byte array containing signature, in a form to be saved to a file.
+
+        @ Description: This method is used for parsing a generated signature into a form, that can
+        be saved to a file, and then parsed back to array of BigInteger.
+     */
+
     public static byte[] parseSignatureToBeSavedToAFile(BigInteger sNo1Number, BigInteger sNo2Number) {
         byte[] sNo1NumberInByteArray = sNo1Number.toByteArray();
         byte[] sNo2NumberInByteArray = sNo2Number.toByteArray();
@@ -103,6 +152,21 @@ public class Parser {
         System.arraycopy(sNo2NumberInByteArray, 0, finalByteArray, currentPointer, sNo2NumberArraySize);
         return finalByteArray;
     }
+
+    /*
+        @ Method: parseSignatureToBeShownInsideTheProgram
+
+        @ Parameters:
+
+        * byte[] byteArrayFromAFile -> Byte array read from a file, that contains formatted signature.
+
+        @ Returns:
+
+        * List<byte[]> -> List of byte arrays representing sNo1Number and sNo2Number in that specific order.
+
+        @ Description: This method is used for parsing back signature saved to a file, to the form of individual
+        values of sNo1Number and sNo2Number.
+     */
 
     public static List<byte[]> parseSignatureToBeShownInsideTheProgram(byte[] byteArrayFromAFile) {
         int filePositionPointer = 0;
@@ -139,6 +203,21 @@ public class Parser {
         return signature;
     }
 
+    /*
+        @ Method: intToByteArrayConversion
+
+        @ Parameters:
+
+        * int someNumber -> some integer value, that later will be converted to byte array form.
+
+        @ Returns:
+
+        * byte[] -> byte array that contains converted int number.
+
+        @ Description: This method is used for converting int number to byte array representation - used for
+        converting length of a byte array to byte array, which can be saved to a file easily.
+     */
+
     public static byte[] intToByteArrayConversion(int someNumber) {
         byte[] byteArrayRepresentationOfInt = new byte[4];
         byteArrayRepresentationOfInt[0] = (byte) ((someNumber >> 24) & 0xFF);
@@ -147,6 +226,21 @@ public class Parser {
         byteArrayRepresentationOfInt[3] = (byte) ((someNumber) & 0xFF);
         return byteArrayRepresentationOfInt;
     }
+
+    /*
+        @ Method: byteArrayToIntConversion
+
+        @ Parameters:
+
+        * byte[] someNumberInByteArray -> byte array that contains some integer values, stored in separate bytes.
+
+        @ Returns:
+
+        * int -> some integer value, that was previously converted to someNumberInByteArray byte array.
+
+        @ Description: This method is used for converting byte array, containing an int number, back to its
+        integer representation.
+     */
 
     public static int byteArrayToIntConversion(byte[] someNumberInByteArray) {
         int someNumber = 0;
