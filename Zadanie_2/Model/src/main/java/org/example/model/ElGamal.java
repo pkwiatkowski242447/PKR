@@ -1,4 +1,4 @@
-package org.example;
+package org.example.model;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -18,7 +18,7 @@ public class ElGamal {
         BigInteger messageDigestV = new BigInteger(messageDigest.digest());
         r = generateRandomNumberInRange(p_2);
         BigInteger s_1 = g.modPow(r, p);
-        BigInteger r_apostrophe = r.modPow(BigInteger.valueOf(-1), p.subtract(BigInteger.ONE));
+        BigInteger r_apostrophe = r.modInverse(p.subtract(BigInteger.ONE));
         BigInteger s_2 = messageDigestV.subtract(a.multiply(s_1)).multiply(r_apostrophe.mod(p.subtract(BigInteger.ONE)));
         signature[0] = s_1;
         signature[1] = s_2;
@@ -36,19 +36,22 @@ public class ElGamal {
         return true;
     }
 
-    public void generatePrimeNumbers() {
+    public void generatePrimeNumbers() {                                                                                //Test Rabina Millera nie działa
+        /*
         boolean isValid = false;
         while (!isValid) {
-            p = BigInteger.probablePrime(1024, rand);
-            isValid = Rabin_Miller_Test(p);
+            p = BigInteger.probablePrime(length, rand);
+            isValid = RabinMillerTest(p);
         }
+        */
+        p = BigInteger.probablePrime(length, rand);
         p_2 = p.subtract(BigInteger.ONE);
         g = generateRandomNumberInRange(p_2);
         a = generateRandomNumberInRange(p_2);
         h = g.modPow(a, p);
     }
 
-    public boolean Rabin_Miller_Test(BigInteger p) {
+    public boolean RabinMillerTest(BigInteger p) {
         /// p - 1 = 2 ^ s * m
         boolean result = false;
         BigInteger m = p.subtract(BigInteger.ONE);
@@ -67,16 +70,14 @@ public class ElGamal {
                 result = true;
                 break;
             }
-            while (yi.mod(p).compareTo(BigInteger.ONE) != 0 && yi.mod(p).compareTo(new BigInteger("-1")) != 0) {
+            do {
                 yi = y0.modPow(BigInteger.TWO, p);
                 y0 = yi;
-            }
-            if (yi.mod(p).compareTo(BigInteger.ONE) == 0) {
-                break;
-            }
+            } while (yi.mod(p).compareTo(BigInteger.ONE) != 0 && yi.mod(p).compareTo(new BigInteger("-1")) != 0);
             if (yi.mod(p).compareTo(new BigInteger("-1")) == 0) {
                 result = true;
-                break;
+            } else {
+                result = false;
             }
             iterator--;
         }
@@ -90,5 +91,13 @@ public class ElGamal {
             x = new BigInteger(max.bitLength(), rand);
         } while (x.compareTo(minLimit) > 0 && x.compareTo(max) < 0);
         return x;
+    }
+
+    public String getPrivateKey() {
+        return a.toString();
+    }
+
+    public String getPublicKey() {
+        return p.toString() + g.toString() + h.toString();
     }
 }
