@@ -7,6 +7,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.model.ElGamal;
+import org.example.model.LengthException;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -51,6 +52,7 @@ public class HelloController {
     @FXML
     TextField signature_result;
     FileChooser fileChooser = new FileChooser();
+    public BigInteger[] signature;
 
 
     @FXML
@@ -86,9 +88,10 @@ public class HelloController {
     }
 
     @FXML
-    public void generateSignature(ActionEvent event) throws NoSuchAlgorithmException {
-        BigInteger[] result = object.signMessage(text_file.getText().getBytes());
-        text_signature.setText(Arrays.toString(result));
+    public void generateSignature(ActionEvent event) throws NoSuchAlgorithmException, LengthException {
+        signature = object.signMessage(text_file.getText().getBytes());
+        String arrayString = String.join(", ", Arrays.stream(signature).map(Object::toString).toArray(String[]::new));
+        text_signature.setText(arrayString);
     }
 
     @FXML
@@ -108,9 +111,14 @@ public class HelloController {
         File file = fileChooser.showOpenDialog(new Stage());
         try {
             Scanner scanner = new Scanner(file);
-            while (scanner.hasNextLine()) {
-                text_signature.appendText(scanner.nextLine());
+            String line = scanner.nextLine();
+            String[] strArray = line.split(", ");
+            BigInteger[] array = new BigInteger[strArray.length];
+            for (int i = 0; i < strArray.length; i++) {
+                array[i] = new BigInteger(strArray[i]);
             }
+            signature = array;
+            text_signature.setText(Arrays.toString(array));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -118,17 +126,7 @@ public class HelloController {
 
     @FXML
     public void verifySignature(ActionEvent event) {
-        BigInteger[] signature = convertTextFieldToArray(text_signature.getText());
         boolean result = object.verifySignature(signature, text_file.getText().getBytes());
         signature_result.setText(String.valueOf(result));
-    }
-
-    private BigInteger[] convertTextFieldToArray(String text) {                                                         //Nie działa
-        String[] stringValues = text.split(",");
-        BigInteger[] bigIntegersValues = new BigInteger[stringValues.length];
-        for (int i = 0; i < stringValues.length; i++) {
-            bigIntegersValues[i] = new BigInteger(stringValues[i].trim());
-        }
-        return bigIntegersValues;
     }
 }

@@ -11,14 +11,18 @@ public class ElGamal {
     private MessageDigest messageDigest;
     private Random rand = new Random();
 
-    public BigInteger[] signMessage(byte[] text) throws NoSuchAlgorithmException {
+
+    public BigInteger[] signMessage(byte[] text) throws NoSuchAlgorithmException, LengthException {
+        if (text.length == 0) {
+            throw new LengthException("Nie można wygenerować podpisu bez tekstu");
+        }
         BigInteger[] signature = new BigInteger[2];
         messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(text);
         BigInteger messageDigestV = new BigInteger(messageDigest.digest());
         r = generateRandomNumberInRange(p_2);
         BigInteger s_1 = g.modPow(r, p);
-        BigInteger r_apostrophe = r.modInverse(p.subtract(BigInteger.ONE));
+        BigInteger r_apostrophe = r.modInverse(p_2);
         BigInteger s_2 = messageDigestV.subtract(a.multiply(s_1)).multiply(r_apostrophe.mod(p.subtract(BigInteger.ONE)));
         signature[0] = s_1;
         signature[1] = s_2;
@@ -36,14 +40,12 @@ public class ElGamal {
         return true;
     }
 
-    public void generatePrimeNumbers() {                                                                                //Test Rabina Millera nie działa
-        /*
+    public void generatePrimeNumbers() {
         boolean isValid = false;
         while (!isValid) {
             p = BigInteger.probablePrime(length, rand);
             isValid = RabinMillerTest(p);
         }
-        */
         p = BigInteger.probablePrime(length, rand);
         p_2 = p.subtract(BigInteger.ONE);
         g = generateRandomNumberInRange(p_2);
@@ -53,16 +55,17 @@ public class ElGamal {
 
     public boolean RabinMillerTest(BigInteger p) {
         /// p - 1 = 2 ^ s * m
-        boolean result = false;
+        boolean result = true;
         BigInteger m = p.subtract(BigInteger.ONE);
         int iterator = 10;
-        BigInteger yi = null;
-        while (m.mod(BigInteger.TWO) != BigInteger.ZERO) {
+        BigInteger yi;
+        while (m.mod(BigInteger.TWO).compareTo(BigInteger.ZERO) != 0) {
             m = (p.subtract(BigInteger.ONE)).divide(BigInteger.TWO);
         }
         while (iterator > 0) {
             BigInteger x = generateRandomNumberInRange(p);
             if (x.gcd(p).compareTo(BigInteger.ONE) != 0) {
+                result = false;
                 break;
             }
             BigInteger y0 = x.modPow(m, p);
@@ -100,4 +103,5 @@ public class ElGamal {
     public String getPublicKey() {
         return p.toString() + g.toString() + h.toString();
     }
+
 }

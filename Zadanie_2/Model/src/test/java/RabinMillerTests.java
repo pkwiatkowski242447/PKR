@@ -14,5 +14,6 @@ public class RabinMillerTests {
         assertTrue(object.RabinMillerTest(BigInteger.ONE));
         assertFalse(object.RabinMillerTest(BigInteger.TWO));
         assertFalse(object.RabinMillerTest(BigInteger.ZERO));
+        assertFalse(object.RabinMillerTest(BigInteger.TEN));
     }
 }
