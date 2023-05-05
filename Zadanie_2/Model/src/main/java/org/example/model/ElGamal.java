@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class ElGamal {
     private BigInteger a, p, g, h, p_2, s_1, s_2, r;
-    private final int length = 1024;
+    private int length = 1024;
     private MessageDigest messageDigest;
     private Random rand = new Random();
 
@@ -19,11 +19,14 @@ public class ElGamal {
         BigInteger[] signature = new BigInteger[2];
         messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(text);
-        BigInteger messageDigestV = new BigInteger(messageDigest.digest());
+        BigInteger messageDigestV = new BigInteger(1, messageDigest.digest());
         r = generateRandomNumberInRange(p_2);
-        BigInteger s_1 = g.modPow(r, p);
+        while (!r.gcd(p_2).equals(BigInteger.ONE)) {
+            r = r.nextProbablePrime();
+        }
         BigInteger r_apostrophe = r.modInverse(p_2);
-        BigInteger s_2 = messageDigestV.subtract(a.multiply(s_1)).multiply(r_apostrophe.mod(p.subtract(BigInteger.ONE)));
+        BigInteger s_1 = g.modPow(r, p);
+        BigInteger s_2 = (messageDigestV.subtract(a.multiply(s_1))).multiply(r_apostrophe).mod(p_2);
         signature[0] = s_1;
         signature[1] = s_2;
         return signature;
@@ -46,7 +49,6 @@ public class ElGamal {
             p = BigInteger.probablePrime(length, rand);
             isValid = RabinMillerTest(p);
         }
-        p = BigInteger.probablePrime(length, rand);
         p_2 = p.subtract(BigInteger.ONE);
         g = generateRandomNumberInRange(p_2);
         a = generateRandomNumberInRange(p_2);
@@ -59,8 +61,8 @@ public class ElGamal {
         BigInteger m = p.subtract(BigInteger.ONE);
         int iterator = 10;
         BigInteger yi;
-        while (m.mod(BigInteger.TWO).compareTo(BigInteger.ZERO) != 0) {
-            m = (p.subtract(BigInteger.ONE)).divide(BigInteger.TWO);
+        while (m.mod(BigInteger.TWO).compareTo(BigInteger.ZERO) == 0) {
+            m = m.divide(BigInteger.TWO);
         }
         while (iterator > 0) {
             BigInteger x = generateRandomNumberInRange(p);
@@ -69,23 +71,24 @@ public class ElGamal {
                 break;
             }
             BigInteger y0 = x.modPow(m, p);
-            if (y0.mod(p).compareTo(BigInteger.ONE) != 0) {
+            if (y0.mod(p).compareTo(BigInteger.ONE) == 0) {
                 result = true;
-                break;
             }
             do {
                 yi = y0.modPow(BigInteger.TWO, p);
                 y0 = yi;
             } while (yi.mod(p).compareTo(BigInteger.ONE) != 0 && yi.mod(p).compareTo(new BigInteger("-1")) != 0);
-            if (yi.mod(p).compareTo(new BigInteger("-1")) == 0) {
-                result = true;
-            } else {
+            if (yi.mod(p).compareTo(BigInteger.ONE) != 0) {
                 result = false;
+                break;
+            } else {
+                result = true;
             }
             iterator--;
         }
         return result;
     }
+
 
     public BigInteger generateRandomNumberInRange(BigInteger max) {
         BigInteger minLimit = BigInteger.ONE;
@@ -103,5 +106,6 @@ public class ElGamal {
     public String getPublicKey() {
         return p.toString() + g.toString() + h.toString();
     }
+
 
 }
