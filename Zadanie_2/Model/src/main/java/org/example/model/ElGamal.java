@@ -7,17 +7,21 @@ import java.util.Random;
 
 public class ElGamal {
     private BigInteger a, p, g, h, p_2, s_1, s_2, r;
-    private int length = 1024;
+    private final int length = 1024;
     private MessageDigest messageDigest;
     private Random rand = new Random();
 
 
-    public BigInteger[] signMessage(byte[] text) throws NoSuchAlgorithmException, LengthException {
+    public ElGamal() throws NoSuchAlgorithmException {
+        generatePrimeNumbers();
+        this.messageDigest = MessageDigest.getInstance("SHA-256");
+    }
+
+    public BigInteger[] signMessage(byte[] text) throws LengthException {
         if (text.length == 0) {
             throw new LengthException("Nie można wygenerować podpisu bez tekstu");
         }
         BigInteger[] signature = new BigInteger[2];
-        messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(text);
         BigInteger messageDigestV = new BigInteger(1, messageDigest.digest());
         r = generateRandomNumberInRange(p_2);
@@ -32,7 +36,10 @@ public class ElGamal {
         return signature;
     }
 
-    public boolean verifySignature(BigInteger[] messageSignature, byte[] message) {
+    public boolean verifySignature(BigInteger[] messageSignature, byte[] message) throws LengthException {
+        if (message.length == 0) {
+            throw new LengthException("Nie można wygenerować podpisu bez tekstu");
+        }
         s_1 = messageSignature[0];
         s_2 = messageSignature[1];
         messageDigest.update(message);
@@ -71,9 +78,6 @@ public class ElGamal {
                 break;
             }
             BigInteger y0 = x.modPow(m, p);
-            if (y0.mod(p).compareTo(BigInteger.ONE) == 0) {
-                result = true;
-            }
             do {
                 yi = y0.modPow(BigInteger.TWO, p);
                 y0 = yi;
@@ -81,8 +85,6 @@ public class ElGamal {
             if (yi.mod(p).compareTo(BigInteger.ONE) != 0) {
                 result = false;
                 break;
-            } else {
-                result = true;
             }
             iterator--;
         }

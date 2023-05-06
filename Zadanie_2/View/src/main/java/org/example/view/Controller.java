@@ -1,6 +1,5 @@
 package org.example.view;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -12,13 +11,9 @@ import org.example.model.LengthException;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.util.*;
 
-public class HelloController {
+public class Controller {
     ElGamal object = new ElGamal();
     @FXML
     Button button_keys;
@@ -55,12 +50,14 @@ public class HelloController {
     @FXML
     TextField signature_result;
     FileChooser fileChooser = new FileChooser();
-    public BigInteger[] signature;
+    public BigInteger[] signature = new BigInteger[2];
+
+    public Controller() throws NoSuchAlgorithmException {
+    }
 
 
     @FXML
     public void handleButtonClick() {
-        object.generatePrimeNumbers();
         text_private_key.setText(object.getPrivateKey());
         text_public_key.setText(object.getPublicKey());
     }
@@ -91,7 +88,7 @@ public class HelloController {
     }
 
     @FXML
-    public void generateSignature() throws NoSuchAlgorithmException, LengthException {
+    public void generateSignature() throws LengthException {
         signature = object.signMessage(text_file.getText().getBytes());
         StringBuilder stringBuilder = new StringBuilder();
         for (BigInteger element : signature) {
@@ -106,7 +103,10 @@ public class HelloController {
         File file = fileChooser.showSaveDialog(new Stage());
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write(Arrays.toString(signature));
+                for (BigInteger element : signature) {
+                    writer.write(element.toString());
+                    writer.newLine();
+                }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -116,25 +116,26 @@ public class HelloController {
     @FXML
     public void loadSignature() {
         File file = fileChooser.showOpenDialog(new Stage());
+        List<String> lines = new ArrayList<>();
         try {
             Scanner scanner = new Scanner(file);
-            String line = scanner.useDelimiter("\\Z").next();
-            line = line.replaceAll("[\\[\\]]", ""); // usunięcie "[" i "]"
-            String[] strArray = line.split(", ");
-            BigInteger[] array = new BigInteger[strArray.length];
-            for (int i = 0; i < strArray.length; i++) {
-                array[i] = new BigInteger(strArray[i]);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                lines.add(line);
             }
-            signature = array;
-            text_signature.setText(Arrays.toString(array));
+            scanner.close();
+            signature[0] = new BigInteger(lines.get(0));
+            signature[1] = new BigInteger(lines.get(1));
+            String lala = lines.get(0) + lines.get(1);
+            text_signature.setText(lala);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
 
     @FXML
-    public void verifySignature() {
+    public void verifySignature() throws LengthException {
         boolean result = object.verifySignature(signature, text_file.getText().getBytes());
         signature_result.setText(String.valueOf(result));
     }

@@ -8,9 +8,11 @@ import org.testng.annotations.Test;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 
-public class Tests {
+public class ElGamalTests {
     private final ElGamal object = new ElGamal();
-    private String text = "KASDKAKSD";
+
+    public ElGamalTests() throws NoSuchAlgorithmException {
+    }
 
     @Test
     public void RabinMillerTest() {
@@ -20,9 +22,10 @@ public class Tests {
     }
 
     @Test
-    public void generatorTests() throws LengthException, NoSuchAlgorithmException {
+    public void generatorTests() throws LengthException {
         object.generatePrimeNumbers();
-        assertTrue(object.signMessage(text.getBytes())[0].compareTo(BigInteger.ZERO) == 1);
-        assertTrue(object.signMessage(text.getBytes())[1].compareTo(BigInteger.ZERO) == 1);
+        String text = "KASDKAKSD";
+        assertEquals(1, object.signMessage(text.getBytes())[0].compareTo(BigInteger.ZERO));
+        assertEquals(1, object.signMessage(text.getBytes())[1].compareTo(BigInteger.ZERO));
     }
 }
