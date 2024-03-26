@@ -1,4 +1,4 @@
-package org.example;
+package org.example.model;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
